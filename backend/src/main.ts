@@ -22,7 +22,9 @@ async function bootstrap() {
     });
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
 
-    app.enableCors();
+    // Restrict to the Vite dev server. Wide-open CORS would let any site
+    // the user visits make requests to localhost:3000 in the browser.
+    app.enableCors({ origin: 'http://localhost:5173' });
     app.enableShutdownHooks();
 
     // Static-serve mirrored sprites (populated by `npm run mirror:sprites`).
@@ -44,7 +46,9 @@ async function bootstrap() {
     });
 
     const port = Number(process.env.PORT) || 3000;
-    await app.listen({ port, host: '0.0.0.0' });
+    // Bind to loopback only — keeps the API off the LAN so other devices on
+    // the same network can't reach it.
+    await app.listen({ port, host: '127.0.0.1' });
     console.log(`API listening on http://localhost:${port}`);
 }
 
