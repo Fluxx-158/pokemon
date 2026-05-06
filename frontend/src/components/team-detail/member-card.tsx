@@ -78,7 +78,6 @@ function StatBreakdown({
     final: number;
     natureName: string;
 }) {
-    // Reproduce the same steps the backend uses, for transparency.
     const raw = Math.floor((2 * base + iv) * 50 / 100);
     const formula = isHp
         ? `floor((2×${base} + ${iv}) × 50/100) + 50 + 10 + ${ev}`

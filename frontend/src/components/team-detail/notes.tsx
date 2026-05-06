@@ -1,8 +1,3 @@
-// Tiny helpers shared between the team detail page and any future component
-// that surfaces team-level notes (lead pair, back pair, mega holder, free
-// text). Pulled out of the megafile so the route shell stays focused on
-// page-level orchestration.
-
 import type { TeamDetail } from '@/modules/api/endpoints';
 
 export function hasAnyNote(notes: TeamDetail['notes']): boolean {

@@ -201,7 +201,6 @@ function ResultRow({ result, q }: { result: MatchupSearchResult; q: string }) {
     );
 }
 
-// Tiny highlighter — wraps occurrences of `q` in the text with <mark>.
 function Highlight({ text, q }: { text: string; q: string }) {
     if (!q) return <>{text}</>;
     const parts: Array<string | { mark: string }> = [];

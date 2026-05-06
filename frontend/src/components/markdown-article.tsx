@@ -1,7 +1,3 @@
-// Standard rendered-markdown surface — the same prose className wrap +
-// ReactMarkdown invocation that strategy-view and matchups-view both
-// used inline. GFM enabled (tables, task lists, strikethrough).
-
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';

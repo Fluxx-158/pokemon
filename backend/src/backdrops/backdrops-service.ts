@@ -118,7 +118,6 @@ export class BackdropsService {
             return ALLOWED_EXT.has(extname(f).toLowerCase());
         });
         const entries = files.map(entryFor);
-        // Newest first.
         entries.sort((a, b) => b.createdAt - a.createdAt);
         return entries;
     }

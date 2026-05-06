@@ -241,9 +241,6 @@ export function defaultStat(baseStat: number, level = 50): number {
     return Math.floor((2 * baseStat + 31) * level / 100) + 5;
 }
 
-// Capitalize a lowercase type name like "fire" → "Fire" for chart lookups
-// keyed by capitalized type names.
-
 // Compute the dual-type effectiveness from the attacker's move type and the
 // defender's two type names. typeChart is the {attacker: {defender: number}}
 // matrix already exposed at /types/chart.

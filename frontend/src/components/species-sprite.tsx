@@ -1,8 +1,3 @@
-// Render a Pokemon sprite from a free-text species name (e.g.
-// "Mega Charizard Y" or "Charizard") by resolving against a
-// pre-built lookup. Falls back to a small italic "?Name" placeholder
-// when the name doesn't resolve.
-
 import { Sprite } from '@/components/sprite';
 import { findSpecies } from '@/lib/species-lookup';
 import type { PokemonListItem } from '@/modules/api/endpoints';

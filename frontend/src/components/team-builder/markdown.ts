@@ -1,6 +1,3 @@
-// Shared types + markdown serialiser for the structured team-builder form.
-// Both the create (/teams/new) and edit (/teams/$id/edit) routes use these.
-
 import type { MemberFormState } from '@/components/team-builder/member-card';
 
 export interface NotesState {

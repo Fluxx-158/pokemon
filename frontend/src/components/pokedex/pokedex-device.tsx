@@ -1,8 +1,3 @@
-// The Pokedex chrome wrapper used by /pokemon and /pokemon/$id.
-// Renders a red device shell with a header (large eye LED, 3-LED status
-// cluster, title, optional meta readout) and a cream "screen" body where
-// the page content lives.
-
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 

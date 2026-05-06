@@ -1,7 +1,3 @@
-// Standard mono textarea for editing markdown — strategy edit, matchup
-// create/edit, the markdown new-team form. Same input chrome as a shadcn
-// <Input> but with mono font + tall default height.
-
 import { cn } from '@/lib/utils';
 
 interface Props {

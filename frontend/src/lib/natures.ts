@@ -1,4 +1,3 @@
-// 25 Pokemon natures with their stat effects.
 // Neutral natures (no plus/minus) are listed alongside the modifying ones —
 // the form should still accept them since some sets intentionally use Hardy.
 

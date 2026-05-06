@@ -25,14 +25,12 @@ function LeadHelperPage() {
 
     const { data: teams } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
 
-    // Default to the first team on the user's behalf if they didn't pick one.
     useEffect(() => {
         if (teamId === null && teams && teams.length > 0) {
             setTeamId(teams[0].id);
         }
     }, [teamId, teams]);
 
-    // Keep URL in sync.
     useEffect(() => {
         if (teamId !== null && teamId !== urlTeamId) {
             navigate({ to: '/lead-helper', search: { teamId }, replace: true });

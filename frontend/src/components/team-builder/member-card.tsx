@@ -40,7 +40,6 @@ interface Props {
 }
 
 export function MemberCard({ slot, value, onChange }: Props) {
-    // Look up the picked pokemon's summary for the accordion header.
     const { data: pokemonList } = useQuery({
         queryKey: ['pokemon'],
         queryFn: getPokemonList,
@@ -152,7 +151,6 @@ export function MemberCard({ slot, value, onChange }: Props) {
     );
 }
 
-// Re-export so the parent route can also peek at sprite info for the header.
 export function useSelectedPokemonSummary(pokemonId: number | null) {
     const { data } = useQuery({
         queryKey: ['pokemon', pokemonId],

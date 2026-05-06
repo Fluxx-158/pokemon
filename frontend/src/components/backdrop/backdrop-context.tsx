@@ -57,7 +57,6 @@ export function BackdropProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Initial fetch.
     useEffect(() => {
         let cancelled = false;
         getBackdrops()

@@ -1,19 +1,3 @@
-// Shared form body for the create + edit team flows.
-//
-// Owns: members + notes + openSlots state, the data queries (pokemon list,
-// PC-holdable items, per-slot pokemon detail), validation, and the form
-// markup itself.
-//
-// Mode-specific concerns stay in the routes:
-//   - Folder name: editable input (create) vs read-only (edit) — rendered
-//     by the route via the `folderInput` prop.
-//   - Initial state: empty for fresh create, computed from the source team
-//     for duplicate, computed from the loaded team for edit. Captured at
-//     mount via useState — pass `key` to remount on a different source.
-//   - Save: createTeam / updateTeam — the route wires its own mutation and
-//     passes `onSave(markdown)` to receive the built markdown payload.
-//   - Page chrome (h1, back link): rendered by the route, OUTSIDE this form.
-
 import { useMemo, useState, type ReactNode } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import {

@@ -43,7 +43,6 @@ export interface Recommendation {
 
 const SUN_SETTERS = new Set(['Charizard Mega Y', 'Torkoal', 'Houndoom Mega', 'Vulpix']);
 
-// Return all k-element combinations of `arr`. Used for 6C4 (brings) and 4C2 (leads).
 function combinations<T>(arr: T[], k: number): T[][] {
     const out: T[][] = [];
     const n = arr.length;

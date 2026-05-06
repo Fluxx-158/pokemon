@@ -1,8 +1,3 @@
-// Combines your team's effective speeds with a curated meta threat list
-// (frontend/src/data/meta-threats.json). Speeds for the meta entries are
-// computed at level 50 with neutral nature, max IVs, no EVs — there's no
-// way to know what the opponent actually runs, so we show the format default.
-
 import { useQuery } from '@tanstack/react-query';
 import {
     getPokemonList,

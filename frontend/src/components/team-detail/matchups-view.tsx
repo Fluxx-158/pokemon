@@ -118,17 +118,14 @@ export function MatchupsView({ teamId, sourceFolder, matchups }: Props) {
     const [draftSlug, setDraftSlug] = useState('');
     const [draftMarkdown, setDraftMarkdown] = useState('');
 
-    // Used to render opponent_lead sprites in the list pane.
     const { data: pokemonList } = useQuery({
         queryKey: ['pokemon'],
         queryFn: getPokemonList,
     });
     const pokemonLookup = useMemo(() => buildPokemonLookup(pokemonList), [pokemonList]);
 
-    // Keep selectedSlug in sync when the list changes underneath us (e.g. a
-    // matchup we had selected was deleted from another tab). Effect, not
-    // setState-during-render, so React doesn't re-run the body just to
-    // discard our work.
+    // Effect (not setState-during-render) so React doesn't re-run the body just
+    // to discard our work when the list changes underneath us.
     useEffect(() => {
         if (mode !== 'view') return;
         if (selectedSlug && !matchups.some((m) => m.slug === selectedSlug)) {
@@ -169,7 +166,6 @@ export function MatchupsView({ teamId, sourceFolder, matchups }: Props) {
         mutationFn: () => deleteMatchup(teamId, selectedSlug!),
         onSuccess: async () => {
             await refreshTeam();
-            // Reactively pick the next matchup; if none, fall through to empty.
             const remaining = matchups.filter((m) => m.slug !== selectedSlug);
             setSelectedSlug(remaining[0]?.slug ?? null);
             setMode('view');

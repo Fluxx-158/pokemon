@@ -332,7 +332,6 @@ export function getItems(opts: { holdable?: boolean; pcOnly?: boolean } = {}): P
     return apiGet<ItemListItem[]>(`/items${qs ? `?${qs}` : ''}`);
 }
 
-// ---- Backdrops ----
 // User-uploaded image / video backdrops. The backend writes them to
 // frontend/public/backdrops/ which Vite serves at /backdrops/<name>;
 // the `url` returned here is a relative path the <Backdrop> component

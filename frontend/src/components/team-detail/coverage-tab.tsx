@@ -1,6 +1,3 @@
-// Auto-derived defensive/offensive analysis from team data + the type chart.
-// Pure client-side, all from queries we already cache.
-
 import { useQuery } from '@tanstack/react-query';
 import {
     getTypeChart,
@@ -26,7 +23,6 @@ export function CoverageTab({ team }: { team: TeamDetail }) {
     if (!typeChart) return <p className="text-sm text-muted-foreground">Loading type chart…</p>;
     if (team.members.length === 0) return <p className="text-sm text-muted-foreground">No team members yet.</p>;
 
-    // Defensive matrix: for each attacking type, the multiplier each member takes.
     const defensive: Record<string, DefensiveCell[]> = {};
     for (const atk of ATTACKING_TYPES) {
         defensive[atk] = team.members.map((m) => {
@@ -37,8 +33,6 @@ export function CoverageTab({ team }: { team: TeamDetail }) {
         });
     }
 
-    // Offensive matrix: for each defending type, list damaging moves on the team
-    // that hit ≥2× super-effective.
     const offensive: Record<string, OffensiveHit[]> = {};
     for (const def of ATTACKING_TYPES) {
         const hits: OffensiveHit[] = [];
@@ -52,12 +46,10 @@ export function CoverageTab({ team }: { team: TeamDetail }) {
                 }
             }
         }
-        // Best multiplier first, then by member slot for stability.
         hits.sort((a, b) => b.mult - a.mult || a.member.slot - b.member.slot);
         offensive[def] = hits;
     }
 
-    // Highlights: defensive holes (3+ members ≥2×) and offensive gaps (no SE).
     const defensiveHoles = ATTACKING_TYPES
         .map((t) => ({ type: t, count: defensive[t].filter((c) => c.mult >= 2).length }))
         .filter((x) => x.count >= 3)
@@ -174,7 +166,6 @@ function multLabel(mult: number): string {
 function DefensiveTable({
     members, defensive,
 }: { members: TeamMemberDetail[]; defensive: Record<string, DefensiveCell[]> }) {
-    // Build a fast lookup: memberId → attackingType → multiplier.
     const byMember: Record<number, Record<string, number>> = {};
     for (const m of members) byMember[m.id] = {};
     for (const t of ATTACKING_TYPES) {

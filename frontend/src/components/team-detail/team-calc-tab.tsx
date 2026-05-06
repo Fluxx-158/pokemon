@@ -32,13 +32,9 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
     const [direction, setDirection] = useState<'attack' | 'defend'>('attack');
     const teamIsAttacker = direction === 'attack';
 
-    // Team-bound side state (which slot of yours we're using).
     const [teamSlot, setTeamSlot] = useState<number>(team.members[0]?.slot ?? 1);
     const teamMember = team.members.find((m) => m.slot === teamSlot) ?? team.members[0];
 
-    // Move id when the team member is the attacker (its 4 chosen moves only).
-    // Recomputes its default whenever the team member changes via the
-    // `key`-style hook below.
     const teamDamagingMoves = useMemo(
         () => teamMember?.moves.filter((m) => m.power !== null) ?? [],
         [teamMember],
@@ -53,7 +49,6 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
         }
     }, [teamDamagingMoves, teamMoveId]);
 
-    // Freeform side state (the opposing pokemon).
     const [freePokemonId, setFreePokemonId] = useState<number | null>(null);
     const [freeMoveId, setFreeMoveId] = useState<number | null>(null);
     const [freeLevel, setFreeLevel] = useState(50);
@@ -73,8 +68,6 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
         [pokemonList, freePokemonId],
     );
 
-    // Need the freeform pokemon's full learnset when it's the attacker
-    // (defending mode). Cached via TanStack Query so flipping back is free.
     const freeDetail = useQuery({
         queryKey: ['pokemon', freePokemonId],
         queryFn: () => getPokemonDetail(freePokemonId!),
@@ -85,7 +78,6 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
         [freeDetail.data],
     );
 
-    // Recompute freeform stat defaults when the picked pokemon (or its level) changes.
     useEffect(() => {
         if (freeSummary) {
             setFreeAtk(defaultStat(freeSummary.stats.atk, freeLevel));
@@ -108,8 +100,6 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
         if (!teamMember || !freeSummary || !selectedMove) return null;
         const isPhysical = selectedMove.damageClass === 'physical';
 
-        // Resolve attacker / defender by direction. Team side uses the
-        // EV-loaded finalStats; freeform side uses the user's numeric inputs.
         return runCalc({
             attackerType1: teamIsAttacker ? teamMember.pokemon.type1 : freeSummary.type1,
             attackerType2: teamIsAttacker ? teamMember.pokemon.type2 : freeSummary.type2,
@@ -134,8 +124,6 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
     if (team.members.length === 0) {
         return <p className="text-sm text-muted-foreground">No team members yet.</p>;
     }
-
-    // ----- Sub-components inlined for state proximity -----
 
     const teamCard = (role: 'Attacker' | 'Defender') => (
         <div className={cn(

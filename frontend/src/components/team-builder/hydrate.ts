@@ -1,6 +1,3 @@
-// Hydrate the structured team-builder form state from a TeamDetail. Used by
-// both the edit form and the duplicate flow on /teams/new?from=:id.
-
 import { EMPTY_MEMBER, type MemberFormState } from '@/components/team-builder/member-card';
 import { EMPTY_NOTES, type NotesState } from '@/components/team-builder/markdown';
 import type { TeamDetail } from '@/modules/api/endpoints';

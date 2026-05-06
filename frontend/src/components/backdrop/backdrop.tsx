@@ -34,7 +34,6 @@ export function Backdrop() {
     // Built-in: parchment → no backdrop layer.
     if (builtin?.kind === 'parchment') return null;
 
-    // Built-in: css preset → render a styled div.
     if (builtin?.kind === 'css') {
         return (
             <div
@@ -62,7 +61,6 @@ export function Backdrop() {
         );
     }
 
-    // Custom upload: video.
     if (custom?.kind === 'video') {
         return (
             <video

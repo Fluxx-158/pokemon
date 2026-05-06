@@ -4,10 +4,6 @@ import { cn } from '@/lib/utils';
 
 const Tabs = TabsPrimitive.Root;
 
-// Dossier tabs: a typewriter-cursor underline replaces the shadcn pill
-// bg. List = hairline rule under the row; Trigger = uppercase tracked
-// label that grows a 2px ink bar from the left when active. Hover lifts
-// the muted state to full contrast so the affordance reads.
 const TabsList = React.forwardRef<
     React.ElementRef<typeof TabsPrimitive.List>,
     React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
@@ -30,9 +26,7 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
         ref={ref}
         className={cn(
-            // Layout + typography
             'relative inline-flex items-center justify-center whitespace-nowrap px-3 pb-2 pt-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors',
-            // States
             'hover:text-foreground focus-visible:outline-none focus-visible:text-foreground disabled:pointer-events-none disabled:opacity-50',
             'data-[state=active]:text-foreground',
             // Typewriter-cursor indicator: 2px bar grows left → right, with a

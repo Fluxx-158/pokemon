@@ -1,10 +1,3 @@
-// Pokemon sprite <img> with the standard hide-on-404 fallback baked in.
-// Replaces the same 4-line {src, className, onError} pattern repeated
-// across 14 callsites.
-//
-// Sizing stays at the call site via className (h-7 w-7 etc.) so the
-// Tailwind JIT can keep generating utilities normally.
-
 import type { ImgHTMLAttributes } from 'react';
 import { spriteUrl } from '@/modules/api/endpoints';
 import { cn } from '@/lib/utils';

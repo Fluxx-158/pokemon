@@ -1,6 +1,3 @@
-// Big monospace dex number readout. Use plain <DexNumber> in row context
-// (#0001) and <DexNumberLarge> for the detail page.
-
 import { cn } from '@/lib/utils';
 
 interface Props {

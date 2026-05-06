@@ -69,7 +69,6 @@ function CalcPage() {
         [pokemonList, defenderId],
     );
 
-    // Attacker pokemon changes → reset move + recompute default Atk/SpA.
     useEffect(() => {
         setMoveId(null);
         if (attackerSummary) {
@@ -81,7 +80,6 @@ function CalcPage() {
         }
     }, [attackerSummary, level]);
 
-    // Defender pokemon changes → recompute default HP/Def/SpD.
     useEffect(() => {
         if (defenderSummary) {
             setDefenderHp(defaultHp(defenderSummary.stats.hp, level));

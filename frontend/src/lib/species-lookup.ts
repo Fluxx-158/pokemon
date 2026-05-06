@@ -27,7 +27,6 @@ export function buildPokemonLookup(list: PokemonListItem[] | undefined): Map<str
     return map;
 }
 
-// Convenience: lookup a name against a pre-built map.
 export function findSpecies(
     lookup: Map<string, PokemonListItem>,
     name: string,
