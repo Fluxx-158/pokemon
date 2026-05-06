@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Env files (secrets)
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local scratch (screenshots, notes, etc.)
+_local/
+
+# Mirrored sprite assets (regenerable via `npm run mirror:sprites`)
+backend/public/sprites/
+
+# TanStack Router build cache
+frontend/.tanstack/
+
+# User-uploaded backdrops live on disk, not in source control.
+# .gitkeep preserves the folder shape on a fresh clone.
+frontend/public/backdrops/*
+!frontend/public/backdrops/.gitkeep

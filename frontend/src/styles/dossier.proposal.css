@@ -1,0 +1,294 @@
+/*
+ * DOSSIER — proposal stylesheet for the Pokemon Champions prep app.
+ *
+ * Design intent: a competitive-battle field manual / dossier.
+ * Vintage technical-journal typography (variable serif headers, technical
+ * sans body, mono for damage rolls), warm parchment surfaces in light mode
+ * and a deep ink scheme at night, one signature oxide-red accent, sharp
+ * hairline rules instead of soft shadows. The app reads as a binder of
+ * intel, not a SaaS dashboard.
+ *
+ * To preview: import this file AFTER index.css in main.tsx. To adopt: replace
+ * the relevant token blocks in index.css. The shadcn token names are kept
+ * intact so existing components keep working.
+ */
+
+/* ---------- Fonts ---------- */
+/* Fraunces  — variable serif with opsz + SOFT axes. Headers, displays. */
+/* Plex Sans — technical sans with character. Body. */
+/* Plex Mono — matching mono. Stats, damage rolls, slugs. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+    /* ---- Parchment (light) palette ---- */
+    /* Warm off-white paper, not the stock 100% white. */
+    --background:      40 33% 96%;     /* #F7F2E8  parchment */
+    --foreground:      28 22% 12%;     /* #241D17  ink */
+    --card:            38 30% 98%;     /* #FBF7EE  page surface */
+    --card-foreground: 28 22% 12%;
+    --popover:         38 30% 98%;
+    --popover-foreground: 28 22% 12%;
+
+    /* Signature accent: oxide red. Aged Pokeball red, not bubblegum. */
+    --primary:           4 56% 43%;    /* #AC362F */
+    --primary-foreground: 40 33% 98%;
+
+    --secondary:           36 18% 90%; /* #E7E0CF  matte cream panel */
+    --secondary-foreground: 28 22% 12%;
+
+    --muted:           36 18% 92%;
+    --muted-foreground: 28 12% 38%;    /* #635A4E  faded ink */
+    --accent:          36 18% 90%;
+    --accent-foreground: 28 22% 12%;
+
+    /* Hazard amber for warnings (not destructive). */
+    --warning:           36 56% 44%;   /* #B07A2D */
+    --warning-foreground: 40 33% 98%;
+
+    /* Destructive stays red but heavier than shadcn's coral. */
+    --destructive:           4 70% 38%;   /* #A52822 */
+    --destructive-foreground: 40 33% 98%;
+
+    /* Hairlines, not blurs. 1px is the rule, period. */
+    --border:    28 22% 80%;            /* #C9C0B1  ink-30 */
+    --input:     28 22% 80%;
+    --ring:      4 56% 43%;
+
+    /* Sharper corners. Cards mat with hairlines, not big radii. */
+    --radius:    0.25rem;
+
+    /* Chart palette tuned to the dossier accent set. */
+    --chart-1:   4 56% 43%;     /* oxide red */
+    --chart-2: 200 35% 32%;     /* depth blue */
+    --chart-3:  36 56% 44%;     /* hazard amber */
+    --chart-4: 152 22% 32%;     /* field olive */
+    --chart-5:  28 22% 24%;     /* deep ink */
+}
+
+.dark {
+    /* ---- Ink (dark) palette ---- */
+    --background:      218 18% 8%;     /* #11141A  deep ink */
+    --foreground:      40 25% 92%;     /* #EFE9DA  bone */
+    --card:            218 18% 11%;    /* #161A22 */
+    --card-foreground: 40 25% 92%;
+    --popover:         218 18% 11%;
+    --popover-foreground: 40 25% 92%;
+
+    /* Same accent, slightly hotter on dark to keep contrast. */
+    --primary:            4 70% 56%;   /* #DC4F45 */
+    --primary-foreground: 40 25% 96%;
+
+    --secondary:           218 14% 16%;
+    --secondary-foreground: 40 25% 92%;
+
+    --muted:               218 14% 16%;
+    --muted-foreground:    40 12% 64%;
+    --accent:              218 14% 16%;
+    --accent-foreground:   40 25% 92%;
+
+    --warning:           36 70% 58%;   /* #DCA147 */
+    --warning-foreground: 218 18% 8%;
+
+    --destructive:           4 70% 50%;
+    --destructive-foreground: 40 25% 96%;
+
+    --border:  218 14% 22%;
+    --input:   218 14% 22%;
+    --ring:    4 70% 56%;
+}
+
+/* ---------- Typography stack ---------- */
+:root {
+    --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
+    --font-sans:    'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+html {
+    font-family: var(--font-sans);
+    /* Slightly reduced default leading; the app is information-dense. */
+    line-height: 1.45;
+}
+
+/* All headings get the serif. opsz makes Fraunces tighten optically as it
+   grows — this is the move that sells the "real publication" feel. */
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-feature-settings: 'ss01' on; /* stylistic alts: tighter g/a */
+    letter-spacing: -0.01em;
+}
+
+/* Tabular nums everywhere data lives. */
+.tabular-nums, .font-mono, code, pre {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Mono uses Plex Mono now. */
+code, pre, .font-mono {
+    font-family: var(--font-mono);
+}
+
+/* ---------- Page chrome ---------- */
+/* Subtle dot-grid background — the "engineering paper" cue. Renders only on
+   the body so cards punch through with a clean cream. */
+body {
+    background-image:
+        radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 18px 18px;
+    background-position: -1px -1px;
+}
+
+/* ---------- Section header marker ---------- */
+/* Use as: <h2 class="dossier-eyebrow">DEFENSIVE COVERAGE</h2>          */
+/* A 3px vertical ink bar + tracked uppercase label. Replaces every     */
+/* "text-sm font-semibold uppercase tracking-wider text-muted-foreground" */
+.dossier-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;     /* 11px */
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--foreground));
+    padding-left: 0.625rem;
+    border-left: 3px solid hsl(var(--foreground));
+    line-height: 1;
+}
+
+/* ---------- Matted card ---------- */
+/* Use as: <div class="dossier-mat">…</div>                            */
+/* Outer hairline + inset frame — like a print mounted in a binder.    */
+.dossier-mat {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: inset 0 0 0 1px hsl(var(--background)),
+                inset 0 0 0 2px hsl(var(--border));
+    border-radius: var(--radius);
+}
+
+/* ---------- Type pill — TCG-card outline ---------- */
+/* Theme-friendly: doesn't set color or font-size so the consumer's    */
+/* inline style (from typeColor) and className tweaks (text-[10px],   */
+/* text-xs, etc.) win. The signature elements are the black hairline */
+/* border + the tiny offset drop-shadow.                              */
+.dossier-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid #0a0a0a;
+    border-radius: 3px;
+    box-shadow: 1px 1px 0 0 #0a0a0a;
+    white-space: nowrap;
+}
+
+/* ---------- Specimen card frame for Pokemon sprites ---------- */
+/* Use as: <figure class="dossier-specimen">…<figcaption>…           */
+/* The caption gets a corner mark + species number for that         */
+/* "field guide plate" feel.                                        */
+.dossier-specimen {
+    position: relative;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--foreground));
+    padding: 8px 8px 6px;
+}
+.dossier-specimen::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid hsl(var(--foreground) / 0.25);
+    pointer-events: none;
+}
+.dossier-specimen figcaption {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: hsl(var(--muted-foreground));
+    display: flex;
+    justify-content: space-between;
+}
+
+/* ---------- Typewriter tab indicator ---------- */
+/* Use on the active tab marker. The 2px bar slides + briefly         */
+/* overshoots, then settles — feels like a typewriter stop.           */
+@keyframes dossier-type-in {
+    0%   { transform: scaleX(0); transform-origin: left; }
+    70%  { transform: scaleX(1.04); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
+}
+.dossier-tab-indicator {
+    height: 2px;
+    background: hsl(var(--primary));
+    animation: dossier-type-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---------- Foil treatment for Mega holder badge ---------- */
+/* Replace the existing `.bg-purple-200` mega-holder pill style with  */
+/* a soft holographic ramp + outer ring. Reads as "rare card."        */
+.dossier-foil {
+    background: linear-gradient(115deg,
+        hsl(290 60% 78%) 0%,
+        hsl(200 70% 78%) 30%,
+        hsl(50 80% 80%) 55%,
+        hsl(330 70% 80%) 80%,
+        hsl(220 60% 80%) 100%);
+    color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    box-shadow: 0 0 0 2px hsl(var(--background)),
+                0 0 0 3px hsl(var(--foreground) / 0.7);
+    text-shadow: 0 1px 0 hsl(0 0% 100% / 0.5);
+}
+
+/* ---------- Foil ring around a card / slot ---------- */
+/* Variant of .dossier-foil for elements where we want the holographic */
+/* gradient as a ring AROUND the content (a card / a sprite slot)      */
+/* rather than a filled badge. Uses the background-clip technique:     */
+/* padding-box layer paints the inner card surface, border-box layer   */
+/* shows the gradient through the transparent border.                  */
+.dossier-foil-ring {
+    border: 2px solid transparent;
+    background:
+        linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+        linear-gradient(115deg,
+            hsl(290 60% 78%) 0%,
+            hsl(200 70% 78%) 30%,
+            hsl(50 80% 80%) 55%,
+            hsl(330 70% 80%) 80%,
+            hsl(220 60% 80%) 100%) border-box;
+    border-radius: calc(var(--radius) + 2px);
+}
+
+/* ---------- Stat reveal flap-board ---------- */
+/* Optional. Apply to .stat-cell when you want stats to "flip in" on  */
+/* tab change — like a flap board at a train station.                 */
+@keyframes dossier-flip {
+    from { transform: rotateX(-90deg); opacity: 0; }
+    to   { transform: rotateX(0); opacity: 1; }
+}
+.dossier-flip {
+    animation: dossier-flip 280ms cubic-bezier(0.3, 0.6, 0.2, 1) both;
+    transform-origin: top center;
+    backface-visibility: hidden;
+}
+
+/* ---------- Hairline divider with fleuron ---------- */
+/* Replace `<hr>` between major sections with this. The diamond glyph */
+/* is a field-manual cue.                                              */
+.dossier-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.625rem;
+}
+.dossier-rule::before, .dossier-rule::after {
+    content: '';
+    flex: 1;
+    border-top: 1px dotted hsl(var(--border));
+}
+.dossier-rule::before { content: ''; }

@@ -1,0 +1,10 @@
+# Local-only files
+.env
+.env.local
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/

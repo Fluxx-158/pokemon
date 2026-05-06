@@ -1,0 +1,293 @@
+/*
+ * Pokédex device chrome — used by /pokemon and /pokemon/$id.
+ *
+ * Layered on top of the dossier theme so the rest of the app keeps its
+ * parchment/serif character. Just these two pages wear the red shell.
+ *
+ * Structure (see PokedexDevice component):
+ *   .pokedex-device
+ *     .pokedex-header   — large round eye LED, 3-LED cluster, title, meta
+ *     .pokedex-screen   — cream panel where the page content lives
+ */
+
+/* ---------- Device shell ---------- */
+.pokedex-device {
+    position: relative;
+    background:
+        repeating-radial-gradient(
+            circle at 1px 1px,
+            rgba(0, 0, 0, 0.05) 0 1px,
+            transparent 1px 4px),
+        linear-gradient(180deg, #c44a40 0%, #ac362f 45%, #862821 100%);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+        0 8px 24px -10px rgba(0, 0, 0, 0.45);
+}
+
+/* Hinge line at left edge — suggests the device opens like a clamshell. */
+.pokedex-device::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 5px;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0.2) 60%,
+        transparent 100%);
+    border-radius: 0 3px 3px 0;
+    pointer-events: none;
+}
+
+/* ---------- Header ---------- */
+.pokedex-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 8px 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* The iconic round blue display LED. Specular highlight via ::after. */
+.pokedex-eye {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 30% 25%,
+        #d9ecff 0%,
+        #5aa9ff 32%,
+        #0d6fd0 70%,
+        #053f7a 100%);
+    box-shadow:
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.55),
+        0 0 0 3px rgba(0, 0, 0, 0.45),
+        0 0 10px rgba(80, 180, 255, 0.55);
+    position: relative;
+    flex-shrink: 0;
+    animation: pokedex-eye-pulse 2.4s ease-in-out infinite;
+}
+
+.pokedex-eye::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    width: 11px;
+    height: 9px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 75%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+@keyframes pokedex-eye-pulse {
+    0%, 100% {
+        box-shadow:
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 0 0 2px rgba(255, 255, 255, 0.55),
+            0 0 0 3px rgba(0, 0, 0, 0.45),
+            0 0 6px rgba(80, 180, 255, 0.4);
+    }
+    50% {
+        box-shadow:
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 0 0 2px rgba(255, 255, 255, 0.55),
+            0 0 0 3px rgba(0, 0, 0, 0.45),
+            0 0 18px rgba(80, 180, 255, 0.85);
+    }
+}
+
+/* Three small status LEDs to the right of the eye. */
+.pokedex-led-cluster {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pokedex-led-small {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow:
+        inset 0 -1px 2px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.pokedex-led-small--red    { background: radial-gradient(circle at 30% 25%, #fff, #ff4040 55%, #aa1010 100%); }
+.pokedex-led-small--yellow { background: radial-gradient(circle at 30% 25%, #fff, #ffd040 55%, #b08008 100%); }
+.pokedex-led-small--green  { background: radial-gradient(circle at 30% 25%, #fff, #5dd75d 55%, #2a8a2a 100%); }
+
+/* Wordmark — sits in the header beside the LEDs. */
+.pokedex-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.96);
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.45),
+        0 0 6px rgba(255, 220, 220, 0.15);
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Right-aligned readout (e.g., "1276 ENTRIES"). */
+.pokedex-meta {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.88);
+    letter-spacing: 0.06em;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    text-transform: uppercase;
+}
+
+/* ---------- Screen ---------- */
+.pokedex-screen {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: 8px;
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+        inset 0 2px 6px rgba(0, 0, 0, 0.18),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.45);
+    padding: 18px;
+    overflow: hidden;
+}
+
+/* Subtle scanline overlay on the "screen". */
+.pokedex-screen--scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        180deg,
+        transparent 0 2px,
+        rgba(0, 0, 0, 0.03) 2px 3px);
+    z-index: 1;
+}
+
+/* ---------- Sub-frame: "scanning window" for the hero artwork on detail. */
+.pokedex-window {
+    position: relative;
+    background: linear-gradient(180deg, #d6e6f5 0%, #b8cee0 50%, #97b6cd 100%);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow:
+        inset 0 0 0 2px #1a4775,
+        inset 0 0 0 4px rgba(255, 255, 255, 0.5),
+        inset 0 0 12px rgba(13, 70, 130, 0.2);
+    overflow: hidden;
+}
+
+/* Scanlines on the artwork window. */
+.pokedex-window::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        180deg,
+        transparent 0 3px,
+        rgba(13, 70, 130, 0.08) 3px 4px);
+    z-index: 1;
+}
+
+/* ---------- Status LED-pill (replaces tag badges) ---------- */
+.pokedex-led-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px 2px 5px;
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.55);
+    color: hsl(var(--foreground));
+    white-space: nowrap;
+}
+
+/* Dark-mode: invert the surface so the foreground text (which is light
+   in dark mode) reads against it. Without this the pill is light-on-light. */
+.dark .pokedex-led-pill {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.pokedex-led-pill::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow:
+        inset 0 -1px 1px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.pokedex-led-pill--ok::before     { background: radial-gradient(circle at 30% 25%, #fff, #5dd75d 55%, #2a8a2a 100%); }
+.pokedex-led-pill--off::before    { background: radial-gradient(circle at 30% 25%, #ddd, #888 55%, #444 100%); }
+.pokedex-led-pill--region::before { background: radial-gradient(circle at 30% 25%, #fff, #5cb8ff 55%, #075aaa 100%); }
+.pokedex-led-pill--mega::before   { background: radial-gradient(circle at 30% 25%, #fff, #d77 55%, #802 100%); }
+
+/* ---------- Big dex number readout ---------- */
+.pokedex-dex-number {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: hsl(var(--primary));
+}
+
+.pokedex-dex-number-large {
+    font-size: 1.5rem;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* When the hero dex number sits inside the artwork window, paint it
+   in a high-contrast badge so it reads against the blue gradient. */
+.pokedex-dex-badge {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: #1a3050;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 4px 10px;
+    border-radius: 4px;
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pokedex-led-stack {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}

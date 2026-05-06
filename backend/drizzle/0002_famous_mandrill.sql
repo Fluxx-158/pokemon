@@ -1,0 +1,22 @@
+CREATE TABLE `moves` (
+	`id` int NOT NULL,
+	`name` varchar(64) NOT NULL,
+	`display_name` varchar(64) NOT NULL,
+	`type_name` varchar(32) NOT NULL,
+	`damage_class` varchar(16) NOT NULL,
+	`power` int,
+	`accuracy` int,
+	`pp_mainline` int NOT NULL,
+	`pp_pc` int NOT NULL,
+	`priority` int NOT NULL,
+	`target` varchar(48) NOT NULL,
+	`effect_chance` int,
+	`short_effect` text,
+	`effect` text,
+	`generation` int,
+	`is_slicing` tinyint NOT NULL DEFAULT 0,
+	`pc_changed` tinyint NOT NULL DEFAULT 0,
+	`pc_notes` text,
+	CONSTRAINT `moves_id` PRIMARY KEY(`id`),
+	CONSTRAINT `moves_name_unique` UNIQUE(`name`)
+);

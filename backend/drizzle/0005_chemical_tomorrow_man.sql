@@ -1,0 +1,1 @@
+ALTER TABLE `pokemon_moves` MODIFY COLUMN `learn_method` varchar(32) NOT NULL;
