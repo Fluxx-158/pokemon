@@ -35,6 +35,11 @@ export function dedupeDamagingMoves(moves: PokemonMoveEntry[]): PokemonMoveEntry
     return Array.from(seen.values()).sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
+// runCalc only reads type/power/damageClass, so accept any move-like shape. This
+// lets both PokemonMoveEntry (/calc) and TeamMoveEntry (team-calc tab) be passed —
+// TeamMoveEntry omits learnMethod/levelLearnedAt, which the calc never touches.
+export type CalcMove = Pick<PokemonMoveEntry, 'type' | 'power' | 'damageClass'>;
+
 export interface RunCalcInput {
     attackerType1: string;
     attackerType2: string | null;
@@ -44,7 +49,7 @@ export interface RunCalcInput {
     attackingStat: number;
     defendingStat: number;
     level: number;
-    move: PokemonMoveEntry | null;
+    move: CalcMove | null;
     isCritical: boolean;
     mods: ModifierState;
     typeChart: TypeChart | undefined;

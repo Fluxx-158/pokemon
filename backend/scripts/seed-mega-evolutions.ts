@@ -16,12 +16,11 @@ interface MegaMapping {
 // mapping itself, so this list is hand-curated against canonical Pokemon
 // mythology (Bulbapedia / Serebii / Champions Database).
 //
-// Includes Z-A additions seeded via pc-overlay-items.ts (synthetic IDs 100001+).
-// Stones for the 11 canonical Gen 6/7 megas banned in PC (blazikenite, diancite,
-// latiasite, latiosite, mawilite, metagrossite, mewtwonite-x/y, salamencite,
-// sceptilite, swampertite) are flagged pc_available=0 in items but the
-// mega_evolutions rows are kept for completeness — filter via the JOIN to
-// items.pc_available when querying for PC-legal megas only.
+// Includes Z-A additions and Regulation M-B additions seeded via pc-overlay-items.ts
+// (synthetic IDs 100001+). As of Reg M-B (2026-06-17) the still-banned Gen 6/7 mega
+// stones are diancite, latiasite, latiosite, mewtwonite-x/y and salamencite — flagged
+// pc_available=0 in items, but their mega_evolutions rows are kept for completeness.
+// Filter via the JOIN to items.pc_available when querying for PC-legal megas only.
 const MAPPINGS: MegaMapping[] = [
     // Gen 6/7 canonical (47 stones from PokeAPI).
     { stone: 'venusaurite',     base: 'venusaur',     mega: 'venusaur-mega' },
@@ -98,6 +97,20 @@ const MAPPINGS: MegaMapping[] = [
     { stone: 'golurkite',       base: 'golurk',       mega: 'golurk-mega' },
     { stone: 'meowsticite',     base: 'meowstic-male', mega: 'meowstic-mega' },
     { stone: 'scovillainite',   base: 'scovillain',   mega: 'scovillain-mega' },
+    // Regulation M-B new megas (11, v1.1.0 2026-06-17). The 5 returning Gen 6 megas
+    // (Sceptile, Blaziken, Swampert, Mawile, Metagross) are already mapped above.
+    // Raichu has two megas (X/Y), mirroring Charizard/Mewtwo.
+    { stone: 'raichunite-x',    base: 'raichu',       mega: 'raichu-mega-x' },
+    { stone: 'raichunite-y',    base: 'raichu',       mega: 'raichu-mega-y' },
+    { stone: 'staraptite',      base: 'staraptor',    mega: 'staraptor-mega' },
+    { stone: 'scolipite',       base: 'scolipede',    mega: 'scolipede-mega' },
+    { stone: 'scraftinite',     base: 'scrafty',      mega: 'scrafty-mega' },
+    { stone: 'eelektrossite',   base: 'eelektross',   mega: 'eelektross-mega' },
+    { stone: 'pyroarite',       base: 'pyroar-male',  mega: 'pyroar-mega' },
+    { stone: 'malamarite',      base: 'malamar',      mega: 'malamar-mega' },
+    { stone: 'barbaracite',     base: 'barbaracle',   mega: 'barbaracle-mega' },
+    { stone: 'dragalgite',      base: 'dragalge',     mega: 'dragalge-mega' },
+    { stone: 'falinksite',      base: 'falinks',      mega: 'falinks-mega' },
 ];
 
 async function main() {

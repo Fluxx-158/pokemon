@@ -10,8 +10,15 @@ interface SpotCheck {
 }
 
 const SPOT_CHECKS: SpotCheck[] = [
+    // ---- PC-legal: Regulation M-B held-item additions (2026-06-17) ----
+    { name: 'life-orb',         expectIsHoldable: true,  expectPcAvailable: true },
+    { name: 'expert-belt',      expectIsHoldable: true,  expectPcAvailable: true },
+    { name: 'muscle-band',      expectIsHoldable: true,  expectPcAvailable: true },
+    { name: 'wide-lens',        expectIsHoldable: true,  expectPcAvailable: true },
+    { name: 'big-root',         expectIsHoldable: true,  expectPcAvailable: true },
+    { name: 'light-clay',       expectIsHoldable: true,  expectPcAvailable: true },
+
     // ---- PC-banned with specific detailed notes ----
-    { name: 'life-orb',         expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: '+20% type-boost' },
     { name: 'choice-band',      expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Choice Scarf is the only' },
     { name: 'choice-specs',     expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Choice Scarf is the only' },
     { name: 'assault-vest',     expectIsHoldable: true,  expectPcAvailable: false },
@@ -21,10 +28,6 @@ const SPOT_CHECKS: SpotCheck[] = [
     { name: 'heavy-duty-boots', expectIsHoldable: true,  expectPcAvailable: false },
 
     // ---- PC-banned via bulk audit with generic note ----
-    { name: 'big-root',         expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
-    { name: 'expert-belt',      expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
-    { name: 'muscle-band',      expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
-    { name: 'wide-lens',        expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
     { name: 'flame-orb',        expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
     { name: 'sticky-barb',      expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
     { name: 'liechi-berry',     expectIsHoldable: true,  expectPcAvailable: false, expectNotesContains: 'Champions Database' },
@@ -86,7 +89,8 @@ const SPOT_CHECKS: SpotCheck[] = [
     { name: 'poke-ball',        expectIsHoldable: false, expectCategory: 'standard-balls' },
 ];
 
-const EXPECTED_PC_HOLDABLE = 117; // is_holdable=1 AND pc_available=1; matches sheet exactly
+const EXPECTED_PC_HOLDABLE = 148; // is_holdable=1 AND pc_available=1; matches sheet whitelist (117 + 31 Reg M-B)
+const EXPECTED_PC_ONLY = 34; // synthetic mega stones (id>=100000): 23 Z-A + 11 Reg M-B
 
 async function main() {
     const config = loadConfig();
@@ -112,12 +116,12 @@ async function main() {
     const zCrystals = zCrystalRows[0].count;
     const pcOnly = pcOnlyRows[0].count;
 
-    console.log(`items total:                      ${total}  (expected 2198 = 2175 PokeAPI + 23 PC-only)`);
+    console.log(`items total:                      ${total}  (expected 2209 = 2175 PokeAPI + 34 PC-only)`);
     console.log(`is_holdable=1:                    ${holdable}`);
     console.log(`PC-legal held items (h=1, pc=1):  ${pcHoldable}  (expected ${EXPECTED_PC_HOLDABLE} = sheet whitelist)`);
     console.log(`pc_available=0:                   ${unavailable}`);
     console.log(`category=z-crystals:              ${zCrystals}`);
-    console.log(`PC-only items (id>=100000):       ${pcOnly}  (expected 23 Z-A mega stones)`);
+    console.log(`PC-only items (id>=100000):       ${pcOnly}  (expected ${EXPECTED_PC_ONLY} = 23 Z-A + 11 Reg M-B mega stones)`);
     console.log('');
 
     let pass = 0;
@@ -165,8 +169,8 @@ async function main() {
         console.log(`[FAIL] PC-legal held item count mismatch: expected ${EXPECTED_PC_HOLDABLE}, got ${pcHoldable}`);
         fail++;
     }
-    if (pcOnly !== 23) {
-        console.log(`[FAIL] PC-only item count mismatch: expected 23, got ${pcOnly}`);
+    if (pcOnly !== EXPECTED_PC_ONLY) {
+        console.log(`[FAIL] PC-only item count mismatch: expected ${EXPECTED_PC_ONLY}, got ${pcOnly}`);
         fail++;
     }
 

@@ -61,7 +61,7 @@ function NewTeamStructuredPage() {
         return <p className="px-6 py-4 text-muted-foreground">Loading source team…</p>;
     }
 
-    const initialMembers = sourceTeam.data ? membersFromDetail(sourceTeam.data) : emptyMembers;
+    const initialMembers = sourceTeam.data ? membersFromDetail(sourceTeam.data) : emptyMembers();
     const initialNotes = sourceTeam.data ? notesFromDetail(sourceTeam.data) : EMPTY_NOTES;
     const folder = sourceFolder.trim();
 

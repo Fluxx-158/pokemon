@@ -26,7 +26,7 @@ interface SpecificNote {
 // Update this list when the sheet changes.
 // =============================================================================
 const PC_HELD_ITEM_SLUGS = new Set<string>([
-    // Mega Stone (59)
+    // Mega Stone (75)
     'manectite', 'houndoominite', 'audinite', 'lopunnite', 'sablenite',
     'sharpedonite', 'gyaradosite', 'lucarionite', 'heracronite', 'aerodactylite',
     'glalitite', 'pinsirite', 'gardevoirite', 'galladite', 'skarmorite',
@@ -39,6 +39,11 @@ const PC_HELD_ITEM_SLUGS = new Set<string>([
     'pidgeotite', 'starminite', 'tyranitarite', 'venusaurite', 'floettite',
     'greninjite', 'delphoxite', 'chesnaughtite', 'chimechite', 'crabominite',
     'glimmoranite', 'golurkite', 'meowsticite', 'scovillainite',
+    // Regulation M-B stones (16): 5 returning Gen 6 megas (now legal) + 11 new megas.
+    'sceptilite', 'blazikenite', 'swampertite', 'mawilite', 'metagrossite',
+    'raichunite-x', 'raichunite-y', 'staraptite', 'scolipite', 'scraftinite',
+    'eelektrossite', 'pyroarite', 'malamarite', 'barbaracite', 'dragalgite',
+    'falinksite',
     // Defense - resist berries (18)
     'roseli-berry', 'chilan-berry', 'babiri-berry', 'haban-berry', 'charti-berry',
     'tanga-berry', 'payapa-berry', 'kebia-berry', 'chople-berry', 'rindo-berry',
@@ -57,6 +62,12 @@ const PC_HELD_ITEM_SLUGS = new Set<string>([
     'white-herb', 'choice-scarf', 'focus-sash',
     // Other (5)
     'kings-rock', 'bright-powder', 'scope-lens', 'quick-claw', 'light-ball',
+    // Regulation M-B held items (15, v1.1.0 2026-06-17). NOTE: this adds Life Orb
+    // and Expert Belt to PC — the old "+20% type-boost is the damage ceiling" rule
+    // no longer holds for M-B. Source: serebii.net/pokemonchampions/rankedbattle/regulationm-b.shtml
+    'expert-belt', 'life-orb', 'muscle-band', 'wise-glasses', 'metronome',
+    'wide-lens', 'zoom-lens', 'big-root', 'iron-ball', 'shed-shell',
+    'light-clay', 'damp-rock', 'heat-rock', 'icy-rock', 'smooth-rock',
 ]);
 
 // =============================================================================
@@ -87,6 +98,19 @@ const PC_ITEM_ADDITIONS: PcOnlyItem[] = [
     { id: 100021, name: 'golurkite',      displayName: 'Golurkite',      category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Golurk to Mega Evolve.',       effect: 'A held item that allows Golurk to Mega Evolve.' },
     { id: 100022, name: 'meowsticite',    displayName: 'Meowsticite',    category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Meowstic to Mega Evolve.',     effect: 'A held item that allows Meowstic to Mega Evolve.' },
     { id: 100023, name: 'scovillainite',  displayName: 'Scovillainite',  category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Scovillain to Mega Evolve.',   effect: 'A held item that allows Scovillain to Mega Evolve.' },
+    // Regulation M-B new mega stones (11). The 5 returning Gen 6 stones (Sceptilite,
+    // Blazikenite, Swampertite, Mawilite, Metagrossite) already exist via PokeAPI/sync:items.
+    { id: 100024, name: 'raichunite-x',   displayName: 'Raichunite X',   category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Raichu to Mega Evolve into Mega Raichu X.', effect: 'A held item that allows Raichu to Mega Evolve into Mega Raichu X.' },
+    { id: 100025, name: 'raichunite-y',   displayName: 'Raichunite Y',   category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Raichu to Mega Evolve into Mega Raichu Y.', effect: 'A held item that allows Raichu to Mega Evolve into Mega Raichu Y.' },
+    { id: 100026, name: 'staraptite',     displayName: 'Staraptite',     category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Staraptor to Mega Evolve.',   effect: 'A held item that allows Staraptor to Mega Evolve.' },
+    { id: 100027, name: 'scolipite',      displayName: 'Scolipite',      category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Scolipede to Mega Evolve.',   effect: 'A held item that allows Scolipede to Mega Evolve.' },
+    { id: 100028, name: 'scraftinite',    displayName: 'Scraftinite',    category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Scrafty to Mega Evolve.',     effect: 'A held item that allows Scrafty to Mega Evolve.' },
+    { id: 100029, name: 'eelektrossite',  displayName: 'Eelektrossite',  category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Eelektross to Mega Evolve.',  effect: 'A held item that allows Eelektross to Mega Evolve.' },
+    { id: 100030, name: 'pyroarite',      displayName: 'Pyroarite',      category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Pyroar to Mega Evolve.',      effect: 'A held item that allows Pyroar to Mega Evolve.' },
+    { id: 100031, name: 'malamarite',     displayName: 'Malamarite',     category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Malamar to Mega Evolve.',     effect: 'A held item that allows Malamar to Mega Evolve.' },
+    { id: 100032, name: 'barbaracite',    displayName: 'Barbaracite',    category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Barbaracle to Mega Evolve.',  effect: 'A held item that allows Barbaracle to Mega Evolve.' },
+    { id: 100033, name: 'dragalgite',     displayName: 'Dragalgite',     category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Dragalge to Mega Evolve.',    effect: 'A held item that allows Dragalge to Mega Evolve.' },
+    { id: 100034, name: 'falinksite',     displayName: 'Falinksite',     category: 'mega-stones', flingPower: 80, shortEffect: 'Allows Falinks to Mega Evolve.',     effect: 'A held item that allows Falinks to Mega Evolve.' },
 ];
 
 // =============================================================================
@@ -95,7 +119,7 @@ const PC_ITEM_ADDITIONS: PcOnlyItem[] = [
 // =============================================================================
 const SPECIFIC_NOTES: SpecificNote[] = [
     // PC trimmed item pool — items present in mainline but not legal in PC.
-    { name: 'life-orb',         pcNotes: 'Not in PC. The +20% type-boost items (Charcoal, Mystic Water, etc.) are the strongest offensive items in PC.' },
+    // NOTE: Life Orb was added to PC in Regulation M-B (2026-06-17) and is now whitelisted above.
     { name: 'choice-band',      pcNotes: 'Not in PC. Choice Scarf is the only Choice item available.' },
     { name: 'choice-specs',     pcNotes: 'Not in PC. Choice Scarf is the only Choice item available.' },
     { name: 'assault-vest',     pcNotes: 'Not in PC.' },
@@ -111,18 +135,14 @@ const SPECIFIC_NOTES: SpecificNote[] = [
     { name: 'covert-cloak',     pcNotes: 'Not in PC.' },
     { name: 'eject-button',     pcNotes: 'Not in PC.' },
     { name: 'eject-pack',       pcNotes: 'Not in PC.' },
-    // Banned Gen 6/7 mega stones
-    { name: 'blazikenite',      pcNotes: 'Not in PC. Mega Blaziken is banned in Pokemon Champions.' },
+    // Banned Gen 6/7 mega stones. NOTE: Blazikenite, Mawilite, Metagrossite, Sceptilite and
+    // Swampertite became legal in Regulation M-B (2026-06-17) and are now whitelisted above.
     { name: 'diancite',         pcNotes: 'Not in PC. Mega Diancie is banned in Pokemon Champions.' },
     { name: 'latiasite',        pcNotes: 'Not in PC. Mega Latias is banned in Pokemon Champions.' },
     { name: 'latiosite',        pcNotes: 'Not in PC. Mega Latios is banned in Pokemon Champions.' },
-    { name: 'mawilite',         pcNotes: 'Not in PC. Mega Mawile is banned in Pokemon Champions.' },
-    { name: 'metagrossite',     pcNotes: 'Not in PC. Mega Metagross is banned in Pokemon Champions.' },
     { name: 'mewtwonite-x',     pcNotes: 'Not in PC. Mega Mewtwo X is banned in Pokemon Champions.' },
     { name: 'mewtwonite-y',     pcNotes: 'Not in PC. Mega Mewtwo Y is banned in Pokemon Champions.' },
     { name: 'salamencite',      pcNotes: 'Not in PC. Mega Salamence is banned in Pokemon Champions.' },
-    { name: 'sceptilite',       pcNotes: 'Not in PC. Mega Sceptile is banned in Pokemon Champions.' },
-    { name: 'swampertite',      pcNotes: 'Not in PC. Mega Swampert is banned in Pokemon Champions.' },
 ];
 
 const GENERIC_UNAVAILABLE_NOTE = 'Not in PC. Not present in the Champions Database held items list.';

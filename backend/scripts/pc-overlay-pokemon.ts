@@ -27,9 +27,10 @@ const PC_MOVE_REMOVALS: MoveRemoval[] = [
 
 // Source: https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_in_Pok%C3%A9mon_Champions
 // (snapshot saved to _local/, parsed via the matcher in _local/pc_roster_parsed.json -> pc_roster_slugs.json)
-// 277 DB slugs corresponding to the 319 Bulbapedia roster entries (cosmetic-only forms like Vivillon
-// patterns / Furfrou trims / Alcremie creams collapse to a single base slug since our DB only has
-// one entry per cosmetic group).
+// Base roster: 277 DB slugs corresponding to the 319 Bulbapedia roster entries (cosmetic-only forms
+// like Vivillon patterns / Furfrou trims / Alcremie creams collapse to a single base slug since our
+// DB only has one entry per cosmetic group). Regulation M-B (2026-06-17) adds 38 more
+// (22 species + 16 Mega forms) — see the labelled block at the end of the set.
 const PC_POKEMON_SLUGS: ReadonlySet<string> = new Set([
     'abomasnow', 'abomasnow-mega', 'absol', 'absol-mega',
     'aegislash-blade', 'aegislash-shield', 'aerodactyl', 'aerodactyl-mega',
@@ -101,6 +102,20 @@ const PC_POKEMON_SLUGS: ReadonlySet<string> = new Set([
     'victreebel-mega', 'vivillon', 'volcarona', 'watchog',
     'weavile', 'whimsicott', 'wyrdeer', 'zoroark',
     'zoroark-hisui',
+    // --- Regulation M-B additions (v1.1.0, 2026-06-17) ---
+    // 22 newly-useable species + 16 new Mega forms.
+    // Source: https://www.serebii.net/pokemonchampions/rankedbattle/regulationm-b.shtml
+    'vileplume', 'qwilfish', 'sceptile', 'blaziken',
+    'swampert', 'mawile', 'metagross', 'staraptor',
+    'musharna', 'scolipede', 'scrafty', 'eelektross',
+    'pyroar-male', 'malamar', 'barbaracle', 'dragalge',
+    'grimmsnarl', 'falinks', 'overqwil', 'houndstone',
+    'annihilape', 'gholdengo',
+    // M-B Mega forms — 5 returning Gen 6 megas (now legal) + 11 new megas.
+    'sceptile-mega', 'blaziken-mega', 'swampert-mega', 'mawile-mega',
+    'metagross-mega', 'raichu-mega-x', 'raichu-mega-y', 'staraptor-mega',
+    'scolipede-mega', 'scrafty-mega', 'eelektross-mega', 'pyroar-mega',
+    'malamar-mega', 'barbaracle-mega', 'dragalge-mega', 'falinks-mega',
 ]);
 
 async function main() {
