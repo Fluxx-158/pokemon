@@ -15,6 +15,20 @@ import {
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import type { TeamFormat } from '@/modules/api/endpoints';
+
+const FORMAT_OPTIONS: ReadonlyArray<{ value: TeamFormat; label: string; hint: string }> = [
+    { value: 'doubles', label: 'Doubles', hint: 'bring 4 of 6, 2 active' },
+    { value: 'singles', label: 'Singles', hint: 'bring 3 of 6, lead 1' },
+    { value: 'both', label: 'Both', hint: 'valid for either format' },
+];
 
 interface Props {
     initialMembers: MemberFormState[];
@@ -25,7 +39,7 @@ interface Props {
      *  error/help text. */
     folderInput: ReactNode;
     saveLabel: string;
-    /** The Cancel button — rendered by the route so it can choose its
+    /** The Cancel button, rendered by the route so it can choose its
      *  navigation target. */
     cancelButton: ReactNode;
     saving: boolean;
@@ -124,6 +138,7 @@ export function TeamForm({
                             key={i}
                             slot={i + 1}
                             value={m}
+                            format={notes.format === 'singles' ? 'singles' : 'doubles'}
                             onChange={(next) => setMembers((prev) => prev.map((p, j) => (j === i ? next : p)))}
                         />
                     ))}
@@ -131,12 +146,46 @@ export function TeamForm({
             </div>
 
             <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Format</label>
+                <div className="flex items-center gap-2">
+                    <Select
+                        value={notes.format}
+                        onValueChange={(v) => setNotes((n) => ({ ...n, format: v as TeamFormat }))}
+                    >
+                        <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {FORMAT_OPTIONS.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <span className="text-xs text-muted-foreground">
+                        {FORMAT_OPTIONS.find((o) => o.value === notes.format)?.hint}
+                    </span>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Notes</label>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    <NoteField label="Lead pair" value={notes.leadPair}
-                        onChange={(v) => setNotes((n) => ({ ...n, leadPair: v }))} />
-                    <NoteField label="Back pair" value={notes.backPair}
-                        onChange={(v) => setNotes((n) => ({ ...n, backPair: v }))} />
+                    {/* Doubles uses lead/back pairs; singles uses a single lead +
+                        the 3-of-6 bring. "Both" teams see all fields. */}
+                    {notes.format !== 'singles' && (
+                        <>
+                            <NoteField label="Lead pair (doubles)" value={notes.leadPair}
+                                onChange={(v) => setNotes((n) => ({ ...n, leadPair: v }))} />
+                            <NoteField label="Back pair (doubles)" value={notes.backPair}
+                                onChange={(v) => setNotes((n) => ({ ...n, backPair: v }))} />
+                        </>
+                    )}
+                    {notes.format !== 'doubles' && (
+                        <>
+                            <NoteField label="Lead (singles)" value={notes.lead}
+                                onChange={(v) => setNotes((n) => ({ ...n, lead: v }))} />
+                            <NoteField label="Bring three (singles)" value={notes.bringThree}
+                                onChange={(v) => setNotes((n) => ({ ...n, bringThree: v }))} />
+                        </>
+                    )}
                     <NoteField label="Mega holder" value={notes.megaHolder}
                         onChange={(v) => setNotes((n) => ({ ...n, megaHolder: v }))} />
                     <NoteField label="Other" value={notes.other}

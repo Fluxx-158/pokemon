@@ -4,7 +4,7 @@
 // in a later slice.
 //
 // Reference: Bulbapedia "Damage" article, Gen 5+ formula. Pokemon Champions
-// follows the same shape — every step is floor()'d, matching the PC stat
+// follows the same shape, every step is floor()'d, matching the PC stat
 // formula we already reverse-engineered for the team detail page.
 
 import { capitalize } from './utils';
@@ -19,16 +19,16 @@ export interface DamageInput {
     isCritical: boolean;
     isPhysical?: boolean;    // needed for burn modifier; defaults to true (caller usually knows)
 
-    // v2 modifiers — all optional, default to no-op.
-    weatherMod?: number;     // 1.5 / 0.5 / 1.0 — caller computes from weather + moveType
+    // v2 modifiers, all optional, default to no-op.
+    weatherMod?: number;     // 1.5 / 0.5 / 1.0, caller computes from weather + moveType
     isBurned?: boolean;       // ×0.5 if isPhysical
     isSpread?: boolean;       // ×0.75 (doubles spread move that hits 2+ targets)
     screenMod?: number;       // 2/3 (doubles) / 0.5 (singles) / 1.0
     itemMod?: number;         // 1.2 (type-boost item like Charcoal) / 1.0
     adaptability?: boolean;   // STAB becomes ×2 instead of ×1.5
     multiscale?: boolean;     // ×0.5 (defender at full HP)
-    filter?: boolean;         // ×0.75 — only if typeMultiplier > 1
-    berryResist?: boolean;    // ×0.5 — caller pre-decides whether the berry triggers
+    filter?: boolean;         // ×0.75, only if typeMultiplier > 1
+    berryResist?: boolean;    // ×0.5, caller pre-decides whether the berry triggers
 }
 
 // Reference table of the 18 type-resist berries. Keyed by canonical type name.
@@ -62,7 +62,7 @@ export const TYPE_RESIST_BERRIES: TypeResistBerry[] = [
 
 // Defender abilities that nullify a move's damage by type. Keyed by move type
 // the ability blocks (some abilities also have other side effects we ignore
-// here — Storm Drain redirects, Volt Absorb heals, etc. — but the damage calc
+// here, Storm Drain redirects, Volt Absorb heals, etc., but the damage calc
 // just zeroes the multiplier).
 export const DEFENDER_IMMUNITY_ABILITIES: ReadonlyArray<{ name: string; immuneTo: string }> = [
     { name: 'Levitate',       immuneTo: 'Ground' },
@@ -175,7 +175,7 @@ export function computeDamage(input: DamageInput, defenderMaxHp: number): Damage
     if (input.isCritical) {
         dmg = Math.floor(dmg * 1.5);
     }
-    // STAB — Adaptability bumps it to ×2.
+    // STAB, Adaptability bumps it to ×2.
     if (input.isStab) {
         const stabFactor = input.adaptability ? 2.0 : 1.5;
         dmg = Math.floor(dmg * stabFactor);
@@ -185,7 +185,7 @@ export function computeDamage(input: DamageInput, defenderMaxHp: number): Damage
         dmg = Math.floor(dmg * 0.5);
     }
 
-    // "Other" bucket — screens, items, abilities, berries. Order within the
+    // "Other" bucket, screens, items, abilities, berries. Order within the
     // bucket only matters at the integer-boundary; we apply in the order
     // most calcs document (screens first, items, then defender-side
     // dampeners) so cross-tool diffs are minimal.
@@ -229,7 +229,7 @@ export function computeDamage(input: DamageInput, defenderMaxHp: number): Damage
     };
 }
 
-// Helpers for the calc UI — derive default stats from a pokemon's base stats
+// Helpers for the calc UI, derive default stats from a pokemon's base stats
 // using the PC formula at level 50 with 31 IVs, 0 EVs, neutral nature. Keeps
 // the calc usable without forcing the user to type stats in for every team.
 

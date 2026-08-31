@@ -5,7 +5,7 @@ import { loadConfig } from '../src/db/client';
 import { touchMetadata } from '../src/db/metadata-write';
 
 // =============================================================================
-// PC MEGA ABILITY OVERLAY — Regulation M-B (v1.1.0, 2026-06-17).
+// PC MEGA ABILITY OVERLAY, Regulation M-B (v1.1.0, 2026-06-17).
 //
 // The 16 new megas' *forms* (types + base stats) come from PokeAPI via sync:pokemon,
 // but PokeAPI leaves the ability lists of the 11 brand-new megas empty, and the two
@@ -33,7 +33,7 @@ interface NewAbility {
     pcNotes: string;
 }
 
-// Synthetic IDs start at 100001 — PokeAPI ability ids are well below that.
+// Synthetic IDs start at 100001, PokeAPI ability ids are well below that.
 const NEW_ABILITIES: NewAbility[] = [
     {
         id: 100001,

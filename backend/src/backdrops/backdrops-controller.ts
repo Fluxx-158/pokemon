@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { BackdropsService } from './backdrops-service';
 
-// 140 MB cap on the base64 string — about 100 MB of decoded binary,
+// 140 MB cap on the base64 string, about 100 MB of decoded binary,
 // matching the per-file size cap in the service.
 const MAX_BASE64_LEN = 140 * 1024 * 1024;
 

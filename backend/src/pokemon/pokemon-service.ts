@@ -7,6 +7,8 @@ import { MegaEvolutionsTable } from '../db/schema/mega-evolutions';
 import { MovesTable } from '../db/schema/moves';
 import { PokemonAbilitiesTable, PokemonMovesTable, PokemonTable } from '../db/schema/pokemon';
 import { TypesTable } from '../db/schema/types';
+import { MetadataTable } from '../db/schema/metadata';
+import { PokemonUsageTable } from '../db/schema/usage';
 import { BusinessException } from '../infrastructure/exceptions';
 
 export interface PokemonStats {
@@ -33,6 +35,7 @@ export interface PokemonListItem {
     type2: string | null;
     stats: PokemonStats;
     generation: number | null;
+    stage: string;
     isMega: boolean;
     isRegional: boolean;
     regionVariant: string | null;
@@ -89,6 +92,42 @@ export interface PokemonBaseForm {
     stats: PokemonStats;
 }
 
+// championsbattledata usage, surfaced per format. Each entry keeps the source
+// `name` plus the resolved id into its own table (moveId/itemId/abilityId/
+// pokemonId, null when unresolved) so the UI can link or fall back to the name.
+export interface UsageEntry {
+    rank: number;
+    name: string;
+    refId: number | null;
+    percentage: number | null;
+}
+export interface UsageNature {
+    rank: number;
+    name: string;
+    percentage: number | null;
+    statUp: string | null;
+    statDown: string | null;
+}
+export interface UsageSpread {
+    rank: number;
+    percentage: number | null;
+    evs: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
+}
+export interface UsageBlock {
+    moves: UsageEntry[];
+    items: UsageEntry[];
+    abilities: UsageEntry[];
+    natures: UsageNature[];
+    spreads: UsageSpread[];
+    teammates: UsageEntry[];
+}
+export interface PokemonUsage {
+    doubles: UsageBlock | null;
+    singles: UsageBlock | null;
+    sourceGeneratedAt: string | null;
+    sourceSeason: string | null; // ranked season (e.g. "M4"), not the regulation
+}
+
 export interface PokemonDetail extends PokemonListItem {
     isDefault: boolean;
     pcNotes: string | null;
@@ -96,6 +135,7 @@ export interface PokemonDetail extends PokemonListItem {
     moves: PokemonMoveEntry[];
     megaEvolutions: PokemonMegaEvolutionEntry[];
     baseForm: PokemonBaseForm | null;
+    usage: PokemonUsage;
 }
 
 @Injectable()
@@ -125,6 +165,7 @@ export class PokemonService {
                 type1Id: PokemonTable.type1Id,
                 type2Id: PokemonTable.type2Id,
                 generation: PokemonTable.generation,
+                stage: PokemonTable.stage,
                 isMega: PokemonTable.isMega,
                 isRegional: PokemonTable.isRegional,
                 regionVariant: PokemonTable.regionVariant,
@@ -182,6 +223,7 @@ export class PokemonService {
                 bst: r.bst,
             },
             generation: r.generation,
+            stage: r.stage,
             isMega: r.isMega === 1,
             isRegional: r.isRegional === 1,
             regionVariant: r.regionVariant,
@@ -199,6 +241,7 @@ export class PokemonService {
                 type1Id: PokemonTable.type1Id,
                 type2Id: PokemonTable.type2Id,
                 generation: PokemonTable.generation,
+                stage: PokemonTable.stage,
                 isDefault: PokemonTable.isDefault,
                 isMega: PokemonTable.isMega,
                 isRegional: PokemonTable.isRegional,
@@ -227,7 +270,7 @@ export class PokemonService {
         const base = baseRows[0];
 
         // For mega forms, look up the canonical base form (a single mega can come
-        // from multiple bases — e.g. Floette + Floette-Eternal share Mega Floette —
+        // from multiple bases, e.g. Floette + Floette-Eternal share Mega Floette, 
         // so prefer the default species when more than one is on file).
         const baseFormPromise = base.isMega === 1
             ? this.datasource.db
@@ -256,7 +299,7 @@ export class PokemonService {
                 bst: number; isDefault: number;
             }>);
 
-        const [typeMap, abilityRows, moveRows, megaRows, baseFormRows] = await Promise.all([
+        const [typeMap, abilityRows, moveRows, megaRows, baseFormRows, usageRows, metaRows] = await Promise.all([
             this.loadTypeMap(),
             this.datasource.db
                 .select({
@@ -313,7 +356,19 @@ export class PokemonService {
                 .innerJoin(ItemsTable, eq(ItemsTable.id, MegaEvolutionsTable.megaStoneId))
                 .where(eq(MegaEvolutionsTable.basePokemonId, id)),
             baseFormPromise,
+            this.datasource.db
+                .select()
+                .from(PokemonUsageTable)
+                .where(eq(PokemonUsageTable.pokemonId, id))
+                .orderBy(asc(PokemonUsageTable.format), asc(PokemonUsageTable.category), asc(PokemonUsageTable.rank)),
+            this.datasource.db
+                .select({ generatedAt: MetadataTable.usageSourceGeneratedAt, season: MetadataTable.usageSourceSeason })
+                .from(MetadataTable)
+                .where(eq(MetadataTable.id, 1))
+                .limit(1),
         ]);
+
+        const usage = this.buildUsage(usageRows, metaRows[0]?.generatedAt ?? null, metaRows[0]?.season ?? null);
 
         const baseForm: PokemonBaseForm | null = baseFormRows.length > 0
             ? {
@@ -348,6 +403,7 @@ export class PokemonService {
                 bst: base.bst,
             },
             generation: base.generation,
+            stage: base.stage,
             isDefault: base.isDefault === 1,
             isMega: base.isMega === 1,
             isRegional: base.isRegional === 1,
@@ -394,6 +450,52 @@ export class PokemonService {
                 megaStonePcAvailable: me.megaStonePcAvailable === 1,
                 notes: me.notes,
             })),
+            usage,
+        };
+    }
+
+    // Group flat pokemon_usage rows (already ordered by format/category/rank)
+    // into a per-format UsageBlock. Returns null for a format with no rows.
+    private buildUsage(
+        rows: Array<typeof PokemonUsageTable.$inferSelect>,
+        sourceGeneratedAt: string | null,
+        sourceSeason: string | null,
+    ): PokemonUsage {
+        const make = (): UsageBlock => ({ moves: [], items: [], abilities: [], natures: [], spreads: [], teammates: [] });
+        const blocks: Record<'doubles' | 'singles', UsageBlock> = { doubles: make(), singles: make() };
+        const seen = { doubles: false, singles: false };
+
+        for (const r of rows) {
+            const fmt = r.format === 'singles' ? 'singles' : 'doubles';
+            seen[fmt] = true;
+            const b = blocks[fmt];
+            const entry: UsageEntry = { rank: r.rank, name: r.name, refId: r.refId, percentage: r.percentage };
+            switch (r.category) {
+                case 'move': b.moves.push(entry); break;
+                case 'held_item': b.items.push(entry); break;
+                case 'ability': b.abilities.push(entry); break;
+                case 'teammate': b.teammates.push(entry); break;
+                case 'stat_alignment':
+                    b.natures.push({ rank: r.rank, name: r.name, percentage: r.percentage, statUp: r.natureUp, statDown: r.natureDown });
+                    break;
+                case 'stat_points':
+                    b.spreads.push({
+                        rank: r.rank,
+                        percentage: r.percentage,
+                        evs: {
+                            hp: r.evHp ?? 0, atk: r.evAtk ?? 0, def: r.evDef ?? 0,
+                            spa: r.evSpa ?? 0, spd: r.evSpd ?? 0, spe: r.evSpe ?? 0,
+                        },
+                    });
+                    break;
+            }
+        }
+
+        return {
+            doubles: seen.doubles ? blocks.doubles : null,
+            singles: seen.singles ? blocks.singles : null,
+            sourceGeneratedAt,
+            sourceSeason,
         };
     }
 }

@@ -19,7 +19,7 @@ export function Sprite({ id, variant = 'default', alt = '', className, ...rest }
             onError={(e) => {
                 const img = e.currentTarget as HTMLImageElement;
                 // Many mega forms (Z-A / Regulation M-B) have no pixel "default" sprite
-                // upstream but do have official artwork — fall back to it before hiding.
+                // upstream but do have official artwork, fall back to it before hiding.
                 const official = spriteUrl(id, 'official');
                 if (variant !== 'official' && !img.dataset.fellBack) {
                     img.dataset.fellBack = '1';

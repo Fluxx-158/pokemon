@@ -48,7 +48,7 @@ function LeadHelperPage() {
             <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-bold">Bring / lead helper</h1>
                 <p className="text-sm text-muted-foreground">
-                    Pick a team, then type in the opposing 6 species at team preview. The app ranks every (bring 4, lead 2) combination by offensive coverage, defensive risk, speed control, and lead synergy bonuses (Fake Out / Intimidate / Prankster Tailwind).
+                    Pick a team, then type in the opposing 6 species at team preview. The app ranks every bring/lead combination, doubles (bring 4, lead 2) or singles (bring 3, lead 1), set by the team's format, by offensive coverage, defensive risk, speed control, and lead synergy bonuses (Fake Out / Intimidate / Prankster Tailwind).
                 </p>
             </div>
 

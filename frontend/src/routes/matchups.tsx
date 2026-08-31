@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 
-// Eager shell — searchMatchups + the search UI live in matchups.lazy.tsx.
+// Eager shell, searchMatchups + the search UI live in matchups.lazy.tsx.
 // validateSearch lets us deep-link into /matchups?q=foo from anywhere
 // (e.g. the search bar on /teams).
 export const Route = createFileRoute('/matchups')({

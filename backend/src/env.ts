@@ -9,6 +9,14 @@ const rawEnvSchema = z.object({
     DB_PASSWORD: notEmptyString,
     DB_NAME: notEmptyString,
     PORT: z.coerce.number().int().default(3000),
+    // Set to false/0/no to run fully offline: the app makes NO calls to
+    // championsbattledata.com (no startup or daily usage sync). Meta/usage
+    // features then read whatever is already in the DB (or degrade gracefully
+    // if never synced). Defaults to enabled.
+    USAGE_SYNC_ENABLED: z
+        .string()
+        .optional()
+        .transform((v) => v === undefined || !/^(false|0|no|off)$/i.test(v.trim())),
 });
 
 export interface SafeConfig {
@@ -18,6 +26,7 @@ export interface SafeConfig {
     dbPassword: string;
     dbName: string;
     port: number;
+    usageSyncEnabled: boolean;
 }
 
 export const SAFE_CONFIG = Symbol('SAFE_CONFIG');
@@ -36,6 +45,7 @@ export function parseEnv(values: Record<string, unknown>): SafeConfig {
         dbPassword: raw.DB_PASSWORD,
         dbName: raw.DB_NAME,
         port: raw.PORT,
+        usageSyncEnabled: raw.USAGE_SYNC_ENABLED,
     };
     return safeConfig;
 }

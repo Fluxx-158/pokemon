@@ -1,7 +1,9 @@
 // Pure team.md parsing + lookup-key normalisation. No DB or filesystem
-// access — both the seed script and the POST /teams service import this.
+// access, both the seed script and the POST /teams service import this.
 
-import type { TeamNotesJson } from '../db/schema/teams';
+import type { TeamFormat, TeamNotesJson } from '../db/schema/teams';
+
+const VALID_FORMATS: ReadonlySet<string> = new Set(['doubles', 'singles', 'both']);
 
 export interface ParsedMember {
     slot: number;
@@ -20,6 +22,7 @@ export interface ParsedMember {
 export interface ParsedTeam {
     name: string;
     sourceFolder: string;
+    format: TeamFormat;
     members: ParsedMember[];
     notes: TeamNotesJson;
 }
@@ -129,7 +132,7 @@ export function parseTeamMarkdown(folderName: string, content: string): ParsedTe
                 if (!value) continue;
                 ivs = parseIntSlashList(value, `${ctx}: IVs`);
             }
-            // Type and Stats lines are ignored — derived / recomputed.
+            // Type and Stats lines are ignored, derived / recomputed.
         }
 
         if (!species) throw new Error(`${ctx}: missing Species`);
@@ -161,6 +164,7 @@ export function parseTeamMarkdown(folderName: string, content: string): ParsedTe
     }
 
     const notes: TeamNotesJson = {};
+    let format: TeamFormat = 'doubles';
     const notesSection = sections.find((s) => /^notes/i.test(s.heading));
     if (notesSection) {
         const other: string[] = [];
@@ -170,7 +174,18 @@ export function parseTeamMarkdown(folderName: string, content: string): ParsedTe
             const { label, value } = bullet;
             const labelLc = label.toLowerCase();
             if (!value) continue;
-            if (labelLc === 'mega stone holder') notes.mega_holder = value;
+            if (labelLc === 'format') {
+                const f = value.toLowerCase();
+                if (!VALID_FORMATS.has(f)) {
+                    throw new Error(`${folderName}: invalid Format "${value}" (use doubles, singles, or both)`);
+                }
+                format = f as TeamFormat;
+            }
+            else if (labelLc === 'mega stone holder') notes.mega_holder = value;
+            // Singles single-lead / bring-three (parsed before the doubles pair
+            // rules so "lead" doesn't get swallowed by the lead-pair matcher).
+            else if (labelLc === 'lead' || labelLc === 'standard lead (single)') notes.lead = value;
+            else if (labelLc === 'bring three' || labelLc === 'bring 3' || labelLc === 'standard bring (3)') notes.bring_three = value;
             else if (/^standard\s+lead( pair)?$/.test(labelLc) || labelLc === 'lead pair') notes.lead_pair = value;
             else if (/^standard\s+back( pair)?$/.test(labelLc) || labelLc === 'back pair') notes.back_pair = value;
             else other.push(`${label}: ${value}`);
@@ -178,7 +193,7 @@ export function parseTeamMarkdown(folderName: string, content: string): ParsedTe
         if (other.length > 0) notes.other = other;
     }
 
-    return { name: teamName, sourceFolder: folderName, members, notes };
+    return { name: teamName, sourceFolder: folderName, format, members, notes };
 }
 
 export function resolve(map: Map<string, number>, kind: string, name: string, ctx: string): number {
@@ -227,7 +242,7 @@ export interface ResolvedMember {
     nature: string;
     moveIds: number[];
     evs: [number, number, number, number, number, number];
-    // Carried through from ParsedMember — undefined means "use format default
+    // Carried through from ParsedMember, undefined means "use format default
     // 31s" and the create/update path skips inserting an IV row.
     ivs?: [number, number, number, number, number, number];
 }

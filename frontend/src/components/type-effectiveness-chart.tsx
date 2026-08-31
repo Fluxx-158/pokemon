@@ -81,7 +81,7 @@ export function TypeEffectivenessChart({ chart, types, defenderType1, defenderTy
     );
 
     return (
-        <div className="rounded-md border" data-transparent-bg>
+        <div className="rounded-md border">
             <table className="w-full table-fixed border-collapse text-sm">
                 <colgroup>
                     <col style={{ width: '180px' }} />

@@ -76,6 +76,7 @@ const TEMPLATE = `# Team name: <enter team name here>
 - **EVs (HP/Atk/Def/SpA/SpD/Spe):**  /  /  /  /  /
 
 ## Notes
+- Format: doubles
 - Mega Stone holder:
 - Standard lead pair:
 - Standard back pair:

@@ -18,6 +18,7 @@ import {
 import { AbilityDescription } from '@/components/ability-description';
 import { MoveClassIcon } from '@/components/move-class-icon';
 import { MoveDescription } from '@/components/move-description';
+import { UsagePanel } from '@/components/pokemon-detail/usage-panel';
 import { TypePill } from '@/components/type-pill';
 import { typeColor } from '@/lib/type-colors';
 import { DexNumber } from '@/components/pokedex/dex-number';
@@ -196,7 +197,7 @@ function PokemonDetailPage() {
                 meta={data.generation ? `ENTRY · GEN ${data.generation}` : 'ENTRY'}
             >
             <div className="flex flex-col gap-8">
-            {/* Hero — official artwork sits inside the Pokédex "scanning window".
+            {/* Hero, official artwork sits inside the Pokédex "scanning window".
                 Dex number callout + status LEDs are pinned to the window's corners. */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
                 <div className="pokedex-window flex h-72 items-center justify-center">
@@ -425,6 +426,9 @@ function PokemonDetailPage() {
                 </div>
             )}
 
+            {/* Competitive usage (Reg M-B) */}
+            <UsagePanel usage={data.usage} />
+
             {/* Moves */}
             <div>
                 <div className="mb-3 flex flex-wrap items-end gap-3">
@@ -520,17 +524,17 @@ function PokemonDetailPage() {
                                     <TableCell>
                                         <MoveClassIcon cls={m.damageClass} />
                                     </TableCell>
-                                    <TableCell className="text-center tabular-nums">{m.power ?? '—'}</TableCell>
+                                    <TableCell className="text-center tabular-nums">{m.power ?? ', '}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.accuracy === null ? '—' : `${m.accuracy}%`}
+                                        {m.accuracy === null ? ', ' : `${m.accuracy}%`}
                                     </TableCell>
                                     <TableCell className="text-center tabular-nums">{m.ppPc}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.priority === 0 ? '—' : (m.priority > 0 ? `+${m.priority}` : m.priority)}
+                                        {m.priority === 0 ? ', ' : (m.priority > 0 ? `+${m.priority}` : m.priority)}
                                     </TableCell>
                                     <TableCell className="text-xs text-muted-foreground">{m.learnMethod}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.learnMethod === 'level-up' ? m.levelLearnedAt : '—'}
+                                        {m.learnMethod === 'level-up' ? m.levelLearnedAt : ', '}
                                     </TableCell>
                                 </TableRow>
                             ))}

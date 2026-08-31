@@ -27,7 +27,7 @@ const PP_OVERRIDES: PpOverride[] = [
 
 // Mainline slicing moves (boosted by Sharpness, pierce Substitute).
 // Source: Bulbapedia "slicing-pierce" / Sharpness category as of late 2024.
-// Maintain manually — PokeAPI does not expose this flag.
+// Maintain manually, PokeAPI does not expose this flag.
 const MAINLINE_SLICING: string[] = [
     'air-cutter',
     'air-slash',
@@ -56,7 +56,7 @@ const MAINLINE_SLICING: string[] = [
     'x-scissor',
 ];
 
-// PC additions to slicing — flagged pc_changed=1.
+// PC additions to slicing, flagged pc_changed=1.
 interface PcSlicingAddition {
     name: string;
     pcNotes: string;

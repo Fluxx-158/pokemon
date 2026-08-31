@@ -1,0 +1,1 @@
+ALTER TABLE `teams` ADD `format` varchar(8) DEFAULT 'doubles' NOT NULL;

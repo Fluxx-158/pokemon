@@ -1,0 +1,1 @@
+ALTER TABLE `metadata` ADD `usage_source_season` varchar(16);

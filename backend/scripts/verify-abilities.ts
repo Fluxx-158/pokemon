@@ -40,7 +40,7 @@ async function main() {
     const pcChanged = pcCountRows[0].count;
 
     console.log(`abilities total:       ${total}  (expected 300+)`);
-    console.log(`abilities pc_changed:  ${pcChanged}  (expected 3 — Unnerve, Unseen Fist, Protean)`);
+    console.log(`abilities pc_changed:  ${pcChanged}  (expected 3, Unnerve, Unseen Fist, Protean)`);
     console.log('');
 
     let pass = 0;

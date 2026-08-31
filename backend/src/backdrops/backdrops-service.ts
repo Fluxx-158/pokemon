@@ -1,4 +1,4 @@
-// User-uploaded backdrop assets — image or video files used by the
+// User-uploaded backdrop assets, image or video files used by the
 // frontend's backdrop picker. Stored as plain files in
 // frontend/public/backdrops/ so Vite serves them at /backdrops/<name>
 // directly (no fastify-static handler on the backend side).

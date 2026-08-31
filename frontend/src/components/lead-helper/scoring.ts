@@ -1,4 +1,4 @@
-// Bring/lead recommendation scorer. Pure module — given a team, the
+// Bring/lead recommendation scorer. Pure module, given a team, the
 // opponent's 6 (as PokemonListItem entries), and the type chart, ranks every
 // (bring 4, lead 2) combination by:
 //
@@ -59,7 +59,7 @@ function combinations<T>(arr: T[], k: number): T[][] {
     return out;
 }
 
-// log base 2 — converts type multipliers (1, 2, 4, 0.5, 0.25) into additive
+// log base 2, converts type multipliers (1, 2, 4, 0.5, 0.25) into additive
 // scores so we can sum them without a 4× advantage being collapsed into the
 // same bucket as a 2× one.
 function effScore(eff: number): number {
@@ -67,19 +67,28 @@ function effScore(eff: number): number {
     return Math.log2(eff);
 }
 
+export interface RankOptions {
+    // Doubles = bring 4 of 6, lead 2 (default). Singles = bring 3 of 6, lead 1.
+    bringSize?: number;
+    leadSize?: number;
+}
+
 export function rankRecommendations(
     members: TeamMemberDetail[],
     opponents: PokemonListItem[],
     typeChart: TypeChart,
+    opts: RankOptions = {},
 ): Recommendation[] {
-    if (members.length < 4 || opponents.length === 0) return [];
+    const bringSize = opts.bringSize ?? 4;
+    const leadSize = opts.leadSize ?? 2;
+    if (members.length < bringSize || opponents.length === 0) return [];
 
-    const brings = combinations(members, 4);
+    const brings = combinations(members, bringSize);
     const out: Recommendation[] = [];
 
     for (const bring of brings) {
-        const leadPairs = combinations(bring, 2);
-        for (const lead of leadPairs) {
+        const leadGroups = combinations(bring, leadSize);
+        for (const lead of leadGroups) {
             const rec = scoreCombination(bring, lead, opponents, typeChart);
             out.push(rec);
         }
@@ -189,7 +198,10 @@ function scoreCombination(
     const leadHasIntimidate = lead.some((m) => m.ability.name === 'intimidate');
     if (leadHasIntimidate) {
         bonuses += 1;
-        notes.push('Intimidate lead: drops both opponents Atk -1');
+        // In doubles Intimidate drops both opposing actives; in singles just the one.
+        notes.push(lead.length >= 2
+            ? 'Intimidate lead: drops both opponents Atk -1'
+            : 'Intimidate lead: drops opponent Atk -1');
     }
 
     const leadHasPrankster = lead.some((m) => m.ability.name === 'prankster');

@@ -14,10 +14,10 @@ export default defineConfig({
         // Pull a few heavy libraries into their own named chunks so they cache
         // independently of app code AND so route-level lazy splitting only
         // pulls them in for routes that actually import them.
-        //   recharts          ~150KB raw — only the pokemon detail uses it
-        //   react-markdown +  ~80KB raw  — only the team strategy view uses
+        //   recharts          ~150KB raw, only the pokemon detail uses it
+        //   react-markdown +  ~80KB raw, only the team strategy view uses
         //     remark-gfm                   markdown rendering
-        //   cmdk              ~30KB       — only the team builder forms
+        //   cmdk              ~30KB, only the team builder forms
         //   radix             grows with each shadcn primitive we add
         rollupOptions: {
             output: {
@@ -35,7 +35,7 @@ export default defineConfig({
                         if (id.includes('/@radix-ui/')) {
                             return 'vendor-radix';
                         }
-                        // Letting Vite auto-handle @tanstack/* — splitting it
+                        // Letting Vite auto-handle @tanstack/*, splitting it
                         // out as a manual chunk produced a circular-chunk
                         // warning with vendor-recharts via shared utilities.
                     }

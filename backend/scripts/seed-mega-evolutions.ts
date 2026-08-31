@@ -18,7 +18,7 @@ interface MegaMapping {
 //
 // Includes Z-A additions and Regulation M-B additions seeded via pc-overlay-items.ts
 // (synthetic IDs 100001+). As of Reg M-B (2026-06-17) the still-banned Gen 6/7 mega
-// stones are diancite, latiasite, latiosite, mewtwonite-x/y and salamencite — flagged
+// stones are diancite, latiasite, latiosite, mewtwonite-x/y and salamencite, flagged
 // pc_available=0 in items, but their mega_evolutions rows are kept for completeness.
 // Filter via the JOIN to items.pc_available when querying for PC-legal megas only.
 const MAPPINGS: MegaMapping[] = [
@@ -148,7 +148,7 @@ async function main() {
     }
 
     if (missing.length) {
-        console.error('Missing references — aborting:');
+        console.error('Missing references, aborting:');
         for (const x of missing) console.error(`  - ${x}`);
         await conn.end();
         process.exit(1);

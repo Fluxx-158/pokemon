@@ -21,7 +21,7 @@ interface SpecificNote {
 }
 
 // =============================================================================
-// PC HELD ITEM WHITELIST — source of truth: Champions Database "Held Items" sheet.
+// PC HELD ITEM WHITELIST, source of truth: Champions Database "Held Items" sheet.
 // Any item with is_holdable=1 NOT in this set is flagged pc_available=0.
 // Update this list when the sheet changes.
 // =============================================================================
@@ -63,7 +63,7 @@ const PC_HELD_ITEM_SLUGS = new Set<string>([
     // Other (5)
     'kings-rock', 'bright-powder', 'scope-lens', 'quick-claw', 'light-ball',
     // Regulation M-B held items (15, v1.1.0 2026-06-17). NOTE: this adds Life Orb
-    // and Expert Belt to PC — the old "+20% type-boost is the damage ceiling" rule
+    // and Expert Belt to PC, the old "+20% type-boost is the damage ceiling" rule
     // no longer holds for M-B. Source: serebii.net/pokemonchampions/rankedbattle/regulationm-b.shtml
     'expert-belt', 'life-orb', 'muscle-band', 'wise-glasses', 'metronome',
     'wide-lens', 'zoom-lens', 'big-root', 'iron-ball', 'shed-shell',
@@ -71,7 +71,7 @@ const PC_HELD_ITEM_SLUGS = new Set<string>([
 ]);
 
 // =============================================================================
-// PC-ONLY ITEMS — items present in PC but not in PokeAPI.
+// PC-ONLY ITEMS, items present in PC but not in PokeAPI.
 // Synthetic IDs start at 100001 to avoid collision with PokeAPI's id space.
 // =============================================================================
 const PC_ITEM_ADDITIONS: PcOnlyItem[] = [
@@ -114,11 +114,11 @@ const PC_ITEM_ADDITIONS: PcOnlyItem[] = [
 ];
 
 // =============================================================================
-// SPECIFIC PC NOTES — detailed notes for high-impact banned items, layered on
+// SPECIFIC PC NOTES, detailed notes for high-impact banned items, layered on
 // top of the generic "not in sheet" message after the bulk audit.
 // =============================================================================
 const SPECIFIC_NOTES: SpecificNote[] = [
-    // PC trimmed item pool — items present in mainline but not legal in PC.
+    // PC trimmed item pool, items present in mainline but not legal in PC.
     // NOTE: Life Orb was added to PC in Regulation M-B (2026-06-17) and is now whitelisted above.
     { name: 'choice-band',      pcNotes: 'Not in PC. Choice Scarf is the only Choice item available.' },
     { name: 'choice-specs',     pcNotes: 'Not in PC. Choice Scarf is the only Choice item available.' },

@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { z } from 'zod';
 
-// Layout for /teams/new and /teams/new/markdown — both routes are siblings
+// Layout for /teams/new and /teams/new/markdown, both routes are siblings
 // under the synthetic `/teams/new` parent that TanStack Router creates from
 // the dotted file naming.
 //

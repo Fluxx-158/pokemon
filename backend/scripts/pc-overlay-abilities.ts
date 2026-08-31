@@ -26,7 +26,7 @@ const OVERLAYS: PcOverlay[] = [
     {
         name: 'protean',
         pcNotes:
-            'Triggers ONCE per switch-in (Gen 9 mainline behavior — worth noting since older-format players may expect per-move triggering). The first move locks the type for the rest of the appearance. Status moves like Protect burn the activation, committing the user to Normal-type for that appearance.',
+            'Triggers ONCE per switch-in (Gen 9 mainline behavior, worth noting since older-format players may expect per-move triggering). The first move locks the type for the rest of the appearance. Status moves like Protect burn the activation, committing the user to Normal-type for that appearance.',
     },
 ];
 

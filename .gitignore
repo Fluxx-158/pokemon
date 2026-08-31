@@ -32,6 +32,9 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Local editor/tool state
+.tooling/
+
 # Local scratch (screenshots, notes, etc.)
 _local/
 
@@ -40,6 +43,10 @@ backend/public/sprites/
 
 # TanStack Router build cache
 frontend/.tanstack/
+
+# Privacy: user's team folders are local competitive prep, keep _template only
+/Teams/*/
+!/Teams/_template/
 
 # User-uploaded backdrops live on disk, not in source control.
 # .gitkeep preserves the folder shape on a fresh clone.

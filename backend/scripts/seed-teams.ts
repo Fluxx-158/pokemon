@@ -47,15 +47,15 @@ async function loadLookups(conn: mysql.Connection): Promise<Lookups> {
 }
 
 async function seedTeam(conn: mysql.Connection, parsed: ParsedTeam, lookups: Lookups): Promise<void> {
-    // Resolve everything up front — any failure throws before any writes.
+    // Resolve everything up front, any failure throws before any writes.
     const resolved = resolveMembers(parsed, lookups);
 
     // Idempotent: delete existing team by source_folder (cascades through members → evs/moves).
     await conn.query('DELETE FROM teams WHERE source_folder = ?', [parsed.sourceFolder]);
 
     const [insertResult] = await conn.query<mysql.ResultSetHeader>(
-        'INSERT INTO teams (name, source_folder, notes) VALUES (?, ?, ?)',
-        [parsed.name, parsed.sourceFolder, JSON.stringify(parsed.notes)],
+        'INSERT INTO teams (name, source_folder, format, notes) VALUES (?, ?, ?, ?)',
+        [parsed.name, parsed.sourceFolder, parsed.format, JSON.stringify(parsed.notes)],
     );
     const teamId = insertResult.insertId;
 

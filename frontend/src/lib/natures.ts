@@ -1,4 +1,4 @@
-// Neutral natures (no plus/minus) are listed alongside the modifying ones —
+// Neutral natures (no plus/minus) are listed alongside the modifying ones, 
 // the form should still accept them since some sets intentionally use Hardy.
 
 export type NatureStat = 'atk' | 'def' | 'spa' | 'spd' | 'spe';

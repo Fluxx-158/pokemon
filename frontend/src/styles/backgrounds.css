@@ -1,11 +1,11 @@
 /*
- * Backdrop CSS — paired with components/backdrop/.
+ * Backdrop CSS, paired with components/backdrop/.
  *
  * Stacking (back to front):
- *   body background-color  — base parchment / ink (always)
- *   <Backdrop /> div/video  — preset (z-index: -2, optional)
- *   body::after             — dot grid (z-index: -1, always)
- *   page content            — auto z-index, on top
+ *   body background-color, base parchment / ink (always)
+ *   <Backdrop /> div/video, preset (z-index: -2, optional)
+ *   body::after, dot grid (z-index: -1, always)
+ *   page content, auto z-index, on top
  *
  * The React <Backdrop /> renders nothing for the "parchment" preset, so
  * you get parchment + dots only. For css-kind presets, it renders a div
@@ -58,7 +58,7 @@ html[data-backdrop="custom"] main::before {
    used throughout the app. Tailwind utility classes have escaped
    slashes in CSS, so `bg-muted/30` becomes `bg-muted\/30`.
 
-   These selectors are deliberately broad — every "rounded border"
+   These selectors are deliberately broad, every "rounded border"
    container in the app should pick up an opaque card surface so
    the backdrop doesn't peek through. Adjust by adding more class
    matchers if a panel is still transparent. */
@@ -81,7 +81,7 @@ html[data-backdrop="custom"]  [class*="bg-blue-50"] {
     background-color: hsl(var(--card)) !important;
 }
 
-/* Tables — usually have no explicit bg. Give the wrapper its card surface
+/* Tables, usually have no explicit bg. Give the wrapper its card surface
    and let table cells inherit through transparency. */
 html[data-backdrop="builtin"] table,
 html[data-backdrop="custom"]  table {
@@ -108,7 +108,7 @@ html[data-backdrop="custom"]  [data-transparent-bg] [class*="bg-muted\/"] {
     background-color: transparent !important;
 }
 
-/* Popovers, dialogs, dropdowns — shadcn already gives these
+/* Popovers, dialogs, dropdowns, shadcn already gives these
    bg-popover, but on top of the body class chain Tailwind's
    utility may lose to our negative-z stacking. Re-assert. */
 html[data-backdrop="builtin"] [data-radix-popper-content-wrapper] > *,
@@ -120,7 +120,7 @@ html[data-backdrop="custom"]  [role="dialog"] {
 
 
 /* ============================================================
- * Emerald sky — animated
+ * Emerald sky, animated
  *   • Base sky gradient: navy → indigo → emerald horizon
  *   • Two cloud layers drift at different speeds for parallax
  *   • Lightning flicker via brief brightness pulse
@@ -134,7 +134,7 @@ html[data-backdrop="custom"]  [role="dialog"] {
         #2a7d6f 100%);
     overflow: hidden;
     /* Lightning runs as an animation on the parent so the whole sky
-       briefly brightens — like the actual title-screen flash. */
+       briefly brightens, like the actual title-screen flash. */
     animation: emerald-lightning 14s ease-in-out infinite;
 }
 
@@ -180,7 +180,7 @@ html[data-backdrop="custom"]  [role="dialog"] {
 }
 
 /* ============================================================
- * Drizzle — animated falling streaks
+ * Drizzle, animated falling streaks
  *   Pelipper rain. Diagonal streaks repeating across viewport.
  * ============================================================ */
 .backdrop-rain {
@@ -205,7 +205,7 @@ html[data-backdrop="custom"]  [role="dialog"] {
 }
 
 /* ============================================================
- * Hex grid — static
+ * Hex grid, static
  * ============================================================ */
 .backdrop-hex {
     background-color: hsl(var(--background));
@@ -219,7 +219,7 @@ html[data-backdrop="custom"]  [role="dialog"] {
 }
 
 /* ============================================================
- * Topographic — static survey-line evocation
+ * Topographic, static survey-line evocation
  * ============================================================ */
 .backdrop-topo {
     background:

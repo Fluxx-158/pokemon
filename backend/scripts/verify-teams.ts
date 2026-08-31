@@ -10,12 +10,14 @@ interface SpotCheck {
     expectSlot1MoveContains?: string[];  // moves.display_name
     expectAnyEvSum?: number;             // sum of EVs across all members (sanity)
     expectNotesHas?: string[];           // substrings expected in JSON.stringify(notes)
+    expectFormat?: string;               // teams.format (doubles | singles | both)
 }
 
 const SPOT_CHECKS: SpotCheck[] = [
     {
         sourceFolder: 'Mega greninja',
         expectMembers: 6,
+        expectFormat: 'doubles',
         expectSlot1Species: 'Incineroar',
         expectSlot1Item: 'Sitrus Berry',
         expectSlot1MoveCount: 4,
@@ -62,7 +64,7 @@ async function main() {
     for (const check of SPOT_CHECKS) {
         const issues: string[] = [];
         const [tRows] = await conn.query<mysql.RowDataPacket[]>(
-            'SELECT id, name, notes FROM teams WHERE source_folder = ?',
+            'SELECT id, name, format, notes FROM teams WHERE source_folder = ?',
             [check.sourceFolder],
         );
         if (tRows.length === 0) {
@@ -71,6 +73,10 @@ async function main() {
             continue;
         }
         const team = tRows[0];
+
+        if (check.expectFormat !== undefined && team.format !== check.expectFormat) {
+            issues.push(`format=${team.format} (expected ${check.expectFormat})`);
+        }
 
         if (check.expectMembers !== undefined) {
             const [mRows] = await conn.query<mysql.RowDataPacket[]>(

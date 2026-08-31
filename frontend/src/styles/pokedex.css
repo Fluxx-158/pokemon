@@ -1,13 +1,13 @@
 /*
- * Pokédex device chrome — used by /pokemon and /pokemon/$id.
+ * Pokédex device chrome, used by /pokemon and /pokemon/$id.
  *
  * Layered on top of the dossier theme so the rest of the app keeps its
  * parchment/serif character. Just these two pages wear the red shell.
  *
  * Structure (see PokedexDevice component):
  *   .pokedex-device
- *     .pokedex-header   — large round eye LED, 3-LED cluster, title, meta
- *     .pokedex-screen   — cream panel where the page content lives
+ *     .pokedex-header, large round eye LED, 3-LED cluster, title, meta
+ *     .pokedex-screen, cream panel where the page content lives
  */
 
 /* ---------- Device shell ---------- */
@@ -28,7 +28,7 @@
         0 8px 24px -10px rgba(0, 0, 0, 0.45);
 }
 
-/* Hinge line at left edge — suggests the device opens like a clamshell. */
+/* Hinge line at left edge, suggests the device opens like a clamshell. */
 .pokedex-device::before {
     content: '';
     position: absolute;
@@ -129,7 +129,7 @@
 .pokedex-led-small--yellow { background: radial-gradient(circle at 30% 25%, #fff, #ffd040 55%, #b08008 100%); }
 .pokedex-led-small--green  { background: radial-gradient(circle at 30% 25%, #fff, #5dd75d 55%, #2a8a2a 100%); }
 
-/* Wordmark — sits in the header beside the LEDs. */
+/* Wordmark, sits in the header beside the LEDs. */
 .pokedex-title {
     font-family: var(--font-display);
     font-weight: 800;

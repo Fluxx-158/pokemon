@@ -1,15 +1,22 @@
 import type { MemberFormState } from '@/components/team-builder/member-card';
+import type { TeamFormat } from '@/modules/api/endpoints';
 
 export interface NotesState {
-    leadPair: string;
-    backPair: string;
+    format: TeamFormat;
+    leadPair: string;   // doubles
+    backPair: string;   // doubles
+    lead: string;       // singles single lead
+    bringThree: string; // singles bring-3
     megaHolder: string;
     other: string;
 }
 
 export const EMPTY_NOTES: NotesState = {
+    format: 'doubles',
     leadPair: '',
     backPair: '',
+    lead: '',
+    bringThree: '',
     megaHolder: '',
     other: '',
 };
@@ -60,9 +67,12 @@ export function buildMarkdown(input: BuildMarkdownInput): string {
     });
 
     lines.push('## Notes');
+    lines.push(`- Format: ${input.notes.format}`);
     if (input.notes.megaHolder) lines.push(`- Mega Stone holder: ${input.notes.megaHolder}`);
     if (input.notes.leadPair) lines.push(`- Standard lead pair: ${input.notes.leadPair}`);
     if (input.notes.backPair) lines.push(`- Standard back pair: ${input.notes.backPair}`);
+    if (input.notes.lead) lines.push(`- Lead: ${input.notes.lead}`);
+    if (input.notes.bringThree) lines.push(`- Bring three: ${input.notes.bringThree}`);
     if (input.notes.other) lines.push(`- Anything else worth flagging: ${input.notes.other}`);
     lines.push('');
 

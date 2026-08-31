@@ -1,6 +1,6 @@
 // Shared damage-calc plumbing between /calc and the team-calc tab. Both
-// pages assemble the same shape — dedupe damaging moves to populate a
-// dropdown, then resolve attacker/defender stats and run the formula —
+// pages assemble the same shape, dedupe damaging moves to populate a
+// dropdown, then resolve attacker/defender stats and run the formula, 
 // just with different sources for the inputs. These two helpers do the
 // work; each route resolves the inputs in its own form-local way.
 
@@ -36,7 +36,7 @@ export function dedupeDamagingMoves(moves: PokemonMoveEntry[]): PokemonMoveEntry
 }
 
 // runCalc only reads type/power/damageClass, so accept any move-like shape. This
-// lets both PokemonMoveEntry (/calc) and TeamMoveEntry (team-calc tab) be passed —
+// lets both PokemonMoveEntry (/calc) and TeamMoveEntry (team-calc tab) be passed, 
 // TeamMoveEntry omits learnMethod/levelLearnedAt, which the calc never touches.
 export type CalcMove = Pick<PokemonMoveEntry, 'type' | 'power' | 'damageClass'>;
 
@@ -59,7 +59,7 @@ export interface RunCalcInput {
 // Resolve STAB + dual-type effectiveness, run the modifier pipeline, and
 // compute the damage range. Returns null when any required input is
 // missing or non-positive (so callers can drop straight into JSX without
-// extra guards). isDoubles defaults to true — both consumers run in
+// extra guards). isDoubles defaults to true, both consumers run in
 // doubles context.
 export function runCalc(p: RunCalcInput): ResultCardCalc | null {
     if (!p.move || !p.typeChart) return null;

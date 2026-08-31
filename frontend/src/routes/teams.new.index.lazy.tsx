@@ -52,7 +52,7 @@ function NewTeamStructuredPage() {
 
     const errMsg = mutation.isError ? errorMessage(mutation.error, 'Failed to create team') : null;
 
-    // Defer mounting the form until the source team hydrates — otherwise
+    // Defer mounting the form until the source team hydrates, otherwise
     // slot 1's always-open NatureSelect mounts with value='' before we can
     // populate it, and Radix Select doesn't reliably re-pick the value
     // when it changes. (Slots 2-6 dodge this because they mount lazily on
@@ -71,9 +71,14 @@ function NewTeamStructuredPage() {
                 <Link to="/teams" className="text-sm text-muted-foreground hover:text-foreground">
                     ← Back to teams
                 </Link>
-                <Link to="/teams/new/markdown" className="text-sm text-muted-foreground hover:text-foreground">
-                    Use markdown form →
-                </Link>
+                <div className="flex gap-4">
+                    <Link to="/teams/new/import" className="text-sm text-muted-foreground hover:text-foreground">
+                        Import paste →
+                    </Link>
+                    <Link to="/teams/new/markdown" className="text-sm text-muted-foreground hover:text-foreground">
+                        Use markdown form →
+                    </Link>
+                </div>
             </div>
 
             <div className="flex flex-col gap-1">

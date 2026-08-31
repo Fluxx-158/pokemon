@@ -69,22 +69,22 @@ const SPOT_CHECKS: SpotCheck[] = [
     { name: 'charcoal',         expectIsHoldable: true,  expectPcAvailable: true,  expectCategory: 'type-enhancement' },
     { name: 'mystic-water',     expectIsHoldable: true,  expectPcAvailable: true,  expectCategory: 'type-enhancement' },
     { name: 'fairy-feather',    expectIsHoldable: true,  expectPcAvailable: true,  expectCategory: 'held-items' },
-    // Incenses ARE type-enhancement but NOT in sheet — should be banned
+    // Incenses ARE type-enhancement but NOT in sheet, should be banned
     { name: 'sea-incense',      expectIsHoldable: true,  expectPcAvailable: false, expectCategory: 'type-enhancement', expectNotesContains: 'Champions Database' },
     { name: 'rose-incense',     expectIsHoldable: true,  expectPcAvailable: false, expectCategory: 'type-enhancement', expectNotesContains: 'Champions Database' },
 
-    // ---- "Other" sheet category — should all be PC-legal ----
+    // ---- "Other" sheet category, should all be PC-legal ----
     { name: 'kings-rock',       expectIsHoldable: true,  expectPcAvailable: true },
     { name: 'bright-powder',    expectIsHoldable: true,  expectPcAvailable: true },
     { name: 'scope-lens',       expectIsHoldable: true,  expectPcAvailable: true },
     { name: 'quick-claw',       expectIsHoldable: true,  expectPcAvailable: true },
     { name: 'light-ball',       expectIsHoldable: true,  expectPcAvailable: true },
 
-    // ---- Z-crystals — all PC-banned with Z-Moves note ----
+    // ---- Z-crystals, all PC-banned with Z-Moves note ----
     { name: 'normalium-z--held', expectPcAvailable: false, expectCategory: 'z-crystals', expectIsHoldable: true, expectNotesContains: 'Z-Moves are not a mechanic' },
     { name: 'firium-z--held',    expectPcAvailable: false, expectCategory: 'z-crystals', expectIsHoldable: true, expectNotesContains: 'Z-Moves are not a mechanic' },
 
-    // ---- Pokeballs (standard-balls — not held) ----
+    // ---- Pokeballs (standard-balls, not held) ----
     { name: 'master-ball',      expectIsHoldable: false, expectCategory: 'standard-balls' },
     { name: 'poke-ball',        expectIsHoldable: false, expectCategory: 'standard-balls' },
 ];

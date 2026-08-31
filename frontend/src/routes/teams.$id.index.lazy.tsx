@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { createLazyFileRoute, Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, Pencil, Tag, Trash2 } from 'lucide-react';
+import { ClipboardCheck, ClipboardCopy, Copy, Pencil, Tag, Trash2 } from 'lucide-react';
+import { teamToPaste } from '@/lib/showdown';
 import {
     deleteTeam,
     getTeamDetail,
     renameTeam,
+    type TeamFormat,
 } from '@/modules/api/endpoints';
 import { errorMessage } from '@/modules/api/api-client';
 import { ErrorBanner } from '@/components/error-banner';
@@ -30,7 +32,20 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+const FORMAT_OPTIONS: ReadonlyArray<{ value: TeamFormat; label: string }> = [
+    { value: 'doubles', label: 'Doubles' },
+    { value: 'singles', label: 'Singles' },
+    { value: 'both', label: 'Both' },
+];
 
 export const Route = createLazyFileRoute('/teams/$id/')({
     component: TeamDetailPage,
@@ -50,6 +65,15 @@ function TeamDetailPage() {
     const [renaming, setRenaming] = useState(false);
     const [renameName, setRenameName] = useState('');
     const [renameFolder, setRenameFolder] = useState('');
+    const [copiedPaste, setCopiedPaste] = useState(false);
+
+    const formatMutation = useMutation({
+        mutationFn: (format: TeamFormat) => renameTeam(id, { format }),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['teams'] });
+            await queryClient.invalidateQueries({ queryKey: ['teams', id] });
+        },
+    });
 
     const renameMutation = useMutation({
         mutationFn: (req: { name?: string; sourceFolder?: string }) => renameTeam(id, req),
@@ -107,6 +131,21 @@ function TeamDetailPage() {
                             <Copy className="h-3.5 w-3.5" />
                             Duplicate
                         </Link>
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                            try {
+                                await navigator.clipboard.writeText(teamToPaste(data));
+                                setCopiedPaste(true);
+                                setTimeout(() => setCopiedPaste(false), 1500);
+                            } catch { /* clipboard blocked, no-op */ }
+                        }}
+                    >
+                        {copiedPaste ? <ClipboardCheck className="h-3.5 w-3.5" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+                        {copiedPaste ? 'Copied!' : 'Copy as paste'}
                     </Button>
                     <Button asChild variant="outline" size="sm">
                         <Link to="/teams/$id/edit" params={{ id: data.id }}>
@@ -173,7 +212,27 @@ function TeamDetailPage() {
                 />
             ) : (
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-bold">{data.name}</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold">{data.name}</h1>
+                        <Select
+                            value={data.format}
+                            onValueChange={(v) => formatMutation.mutate(v as TeamFormat)}
+                            disabled={formatMutation.isPending}
+                        >
+                            <SelectTrigger
+                                className="h-7 w-[110px] text-xs"
+                                aria-label="Team format"
+                                title="Change format"
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {FORMAT_OPTIONS.map((o) => (
+                                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                         folder “{data.sourceFolder}” · {data.members.length} Pokemon
                         {data.megaHolderSlot !== null && ` · mega holder in slot ${data.megaHolderSlot}`}

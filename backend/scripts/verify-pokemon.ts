@@ -98,7 +98,7 @@ const SPOT_CHECKS: SpotCheck[] = [
         name: 'tornadus-therian',
         expectType1: 'flying',
     },
-    // Floette-Eternal — doubles meta mega target.
+    // Floette-Eternal, doubles meta mega target.
     {
         name: 'floette-eternal',
         expectType1: 'fairy',

@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { AnalysisController } from './analysis/analysis-controller';
+import { AnalysisService } from './analysis/analysis-service';
 import { AppController } from './app.controller';
 import { BackdropsController } from './backdrops/backdrops-controller';
 import { BackdropsService } from './backdrops/backdrops-service';
@@ -17,14 +20,16 @@ import { TeamsController } from './teams/teams-controller';
 import { TeamsService } from './teams/teams-service';
 import { TypesController } from './types/types-controller';
 import { TypesService } from './types/types-service';
+import { UsageSyncService } from './usage/usage-sync.service';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             validate: parseEnv,
         }),
+        ScheduleModule.forRoot(),
     ],
-    controllers: [AppController, TypesController, PokemonController, TeamsController, ItemsController, BackdropsController],
+    controllers: [AppController, TypesController, PokemonController, TeamsController, ItemsController, BackdropsController, AnalysisController],
     providers: [
         // useFactory defers evaluation until after ConfigModule has run parseEnv,
         // so injectees see the populated safeConfig rather than the pre-init undefined.
@@ -35,6 +40,8 @@ import { TypesService } from './types/types-service';
         TeamsService,
         ItemsService,
         BackdropsService,
+        UsageSyncService,
+        AnalysisService,
         // Order matters: exception interceptor runs first (outermost) so thrown
         // BaseExceptions become envelope-shaped HttpException payloads before
         // the envelop interceptor sees them as already-envelope responses.

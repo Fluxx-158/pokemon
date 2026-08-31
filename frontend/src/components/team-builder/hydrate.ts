@@ -29,13 +29,16 @@ export function membersFromDetail(team: TeamDetail): MemberFormState[] {
 
 export function notesFromDetail(team: TeamDetail): NotesState {
     const n = team.notes;
-    if (!n) return EMPTY_NOTES;
+    if (!n) return { ...EMPTY_NOTES, format: team.format };
     return {
+        format: team.format,
         leadPair: n.lead_pair ?? '',
         backPair: n.back_pair ?? '',
+        lead: n.lead ?? '',
+        bringThree: n.bring_three ?? '',
         megaHolder: n.mega_holder ?? '',
         // The notes parser collects unrecognised bullets into `other` as
-        // "Label: value" strings. We flatten back to a single Input field —
+        // "Label: value" strings. We flatten back to a single Input field, 
         // multi-line richness is preserved by editing team.md on disk if the
         // user ever needs more than one line here.
         other: (n.other ?? []).join(' · '),

@@ -32,7 +32,7 @@ interface PokeApiItem {
 // PokeAPI's `attributes` field is unreliable for is_holdable: many held items
 // (Eviolite, Rocky Helmet, Assault Vest, etc.) have empty attributes, while
 // pokeballs are tagged "holdable" despite not being held in normal play.
-// Derive from category instead — these are the categories whose items can be
+// Derive from category instead, these are the categories whose items can be
 // held by a Pokemon during battle.
 const HOLDABLE_CATEGORIES = new Set([
     'held-items',

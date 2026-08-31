@@ -30,7 +30,7 @@ export class ApiError extends Error {
 // (mutation errors, query errors, anything caught from a fetch). Picks
 // the structured display message off our envelope errors first, then
 // falls back to the generic Error.message, then the supplied fallback.
-// Always returns a string — caller gates on .isError or null themselves.
+// Always returns a string, caller gates on .isError or null themselves.
 export function errorMessage(err: unknown, fallback = 'Operation failed'): string {
     if (err instanceof ApiError) return err.displayMessage ?? err.message;
     if (err instanceof Error) return err.message;

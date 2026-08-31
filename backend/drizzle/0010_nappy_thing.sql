@@ -1,0 +1,1 @@
+ALTER TABLE `pokemon` ADD `stage` varchar(8) DEFAULT 'basic' NOT NULL;

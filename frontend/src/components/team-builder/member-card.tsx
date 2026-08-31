@@ -7,6 +7,7 @@ import { ItemPicker } from '@/components/pickers/item-picker';
 import { MovePicker } from '@/components/pickers/move-picker';
 import { NatureSelect } from '@/components/pickers/nature-select';
 import { PokemonPicker } from '@/components/pickers/pokemon-picker';
+import { OptimizePanel } from '@/components/team-builder/optimize-panel';
 import { TypePill } from '@/components/type-pill';
 import {
     AccordionContent,
@@ -37,9 +38,11 @@ interface Props {
     slot: number;
     value: MemberFormState;
     onChange: (next: MemberFormState) => void;
+    /** Used by the spread optimizer to pull format-specific meta targets. */
+    format?: 'doubles' | 'singles';
 }
 
-export function MemberCard({ slot, value, onChange }: Props) {
+export function MemberCard({ slot, value, onChange, format = 'doubles' }: Props) {
     const { data: pokemonList } = useQuery({
         queryKey: ['pokemon'],
         queryFn: getPokemonList,
@@ -145,6 +148,20 @@ export function MemberCard({ slot, value, onChange }: Props) {
                         value={value.evs}
                         onChange={(evs) => onChange({ ...value, evs })}
                     />
+
+                    {value.pokemonId !== null && summary && value.nature && (
+                        <OptimizePanel
+                            pokemonId={value.pokemonId}
+                            baseStats={summary.stats}
+                            type1={summary.type1}
+                            type2={summary.type2}
+                            nature={value.nature}
+                            evs={value.evs}
+                            moveIds={value.moveIds}
+                            format={format}
+                            onApply={(key, points) => onChange({ ...value, evs: { ...value.evs, [key]: points } })}
+                        />
+                    )}
                 </div>
             </AccordionContent>
         </AccordionItem>

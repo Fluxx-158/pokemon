@@ -30,7 +30,7 @@ const PC_MOVE_REMOVALS: MoveRemoval[] = [
 // Base roster: 277 DB slugs corresponding to the 319 Bulbapedia roster entries (cosmetic-only forms
 // like Vivillon patterns / Furfrou trims / Alcremie creams collapse to a single base slug since our
 // DB only has one entry per cosmetic group). Regulation M-B (2026-06-17) adds 38 more
-// (22 species + 16 Mega forms) — see the labelled block at the end of the set.
+// (22 species + 16 Mega forms), see the labelled block at the end of the set.
 const PC_POKEMON_SLUGS: ReadonlySet<string> = new Set([
     'abomasnow', 'abomasnow-mega', 'absol', 'absol-mega',
     'aegislash-blade', 'aegislash-shield', 'aerodactyl', 'aerodactyl-mega',
@@ -111,7 +111,7 @@ const PC_POKEMON_SLUGS: ReadonlySet<string> = new Set([
     'pyroar-male', 'malamar', 'barbaracle', 'dragalge',
     'grimmsnarl', 'falinks', 'overqwil', 'houndstone',
     'annihilape', 'gholdengo',
-    // M-B Mega forms — 5 returning Gen 6 megas (now legal) + 11 new megas.
+    // M-B Mega forms, 5 returning Gen 6 megas (now legal) + 11 new megas.
     'sceptile-mega', 'blaziken-mega', 'swampert-mega', 'mawile-mega',
     'metagross-mega', 'raichu-mega-x', 'raichu-mega-y', 'staraptor-mega',
     'scolipede-mega', 'scrafty-mega', 'eelektross-mega', 'pyroar-mega',
@@ -161,7 +161,7 @@ async function main() {
     const totalDb = pokemonRows.length;
     console.log(`PC roster: ${expectedKept} kept (pc_available=1), ${removedCount} marked not-PC (pc_available=0), ${totalDb} total`);
     if (expectedKept + removedCount !== totalDb) {
-        console.warn(`WARNING: count mismatch — kept(${expectedKept}) + removed(${removedCount}) ≠ total(${totalDb}).`);
+        console.warn(`WARNING: count mismatch, kept(${expectedKept}) + removed(${removedCount}) ≠ total(${totalDb}).`);
     }
 
     let removalsApplied = 0;

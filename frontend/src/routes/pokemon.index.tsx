@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -51,6 +51,17 @@ function pageSizeLabel(opt: PageSizeOption): string {
 
 const TYPES = Object.keys(TYPE_COLORS);
 const GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+// Stage filter values are fixed (they map to the `stage` column); the labels are
+// cosmetic and switchable. "tcg" = chain-depth wording (PokéSynergy parity);
+// "simple" = position wording. NOTE: "simple" is by chain depth, so a 2-stage
+// line's final form reads as "Middle form" (e.g. Gyarados).
+const STAGE_VALUES = ['baby', 'basic', 'stage1', 'stage2', 'mega'] as const;
+type StageLabelStyle = 'tcg' | 'simple';
+const STAGE_LABELS: Record<StageLabelStyle, Record<string, string>> = {
+    tcg: { baby: 'Baby', basic: 'Basic', stage1: 'Stage 1', stage2: 'Stage 2', mega: 'Mega' },
+    simple: { baby: 'Baby', basic: 'First form', stage1: 'Middle form', stage2: 'Final form', mega: 'Mega' },
+};
+const STAGE_LABEL_STYLE_KEY = 'pokedex.stageLabelStyle';
 
 interface StatRange {
     min: string; // string so empty inputs don't fight controlled-number quirks
@@ -173,6 +184,15 @@ function PokemonPage() {
     const [typeFilter2, setTypeFilter2] = useState<string>('');         // '' = any (paired with typeFilter1, must both match)
     const [abilityId, setAbilityId] = useState<number | null>(null);    // null = any
     const [generation, setGeneration] = useState<string>('');           // '' = any, otherwise '1'..'9'
+    const [stage, setStage] = useState<string>('');                     // '' = any, otherwise baby|basic|stage1|stage2|mega
+    const [stageLabelStyle, setStageLabelStyle] = useState<StageLabelStyle>(() => {
+        if (typeof window === 'undefined') return 'tcg';
+        const saved = window.localStorage.getItem(STAGE_LABEL_STYLE_KEY);
+        return saved === 'simple' || saved === 'tcg' ? saved : 'tcg';
+    });
+    useEffect(() => {
+        window.localStorage.setItem(STAGE_LABEL_STYLE_KEY, stageLabelStyle);
+    }, [stageLabelStyle]);
     const [megaOnly, setMegaOnly] = useState(false);
     const [regionalOnly, setRegionalOnly] = useState(false);
     const [showStatFilters, setShowStatFilters] = useState(false);
@@ -214,7 +234,7 @@ function PokemonPage() {
         const q = search.trim().toLowerCase();
         if (q) rows = rows.filter((p) => p.displayName.toLowerCase().includes(q));
 
-        // Type filter — both fields contribute, deduplicated. With two types
+        // Type filter, both fields contribute, deduplicated. With two types
         // selected, the pokemon must carry both (in any slot). With one
         // selected, we keep the single-type behaviour.
         const wantedTypes = Array.from(new Set([typeFilter1, typeFilter2].filter(Boolean)));
@@ -231,8 +251,11 @@ function PokemonPage() {
             const gen = Number(generation);
             rows = rows.filter((p) => p.generation === gen);
         }
+        if (stage) {
+            rows = rows.filter((p) => p.stage === stage);
+        }
 
-        // Stat range filters — only apply ranges that have at least one bound.
+        // Stat range filters, only apply ranges that have at least one bound.
         const activeRanges = STAT_KEYS.filter((k) => rangeActive(statRanges[k]));
         if (activeRanges.length > 0) {
             rows = rows.filter((p) =>
@@ -244,7 +267,7 @@ function PokemonPage() {
         }
 
         return rows;
-    }, [data, pcOnly, megaOnly, regionalOnly, search, typeFilter1, typeFilter2, abilityId, generation, statRanges]);
+    }, [data, pcOnly, megaOnly, regionalOnly, search, typeFilter1, typeFilter2, abilityId, generation, stage, statRanges]);
 
     const filteredCount = filtered.length;
     const effectivePageSize = pageSize === 'all' ? Math.max(filteredCount, 1) : parseInt(pageSize, 10);
@@ -260,11 +283,12 @@ function PokemonPage() {
         || typeFilter1 !== '' || typeFilter2 !== ''
         || abilityId !== null
         || generation !== ''
+        || stage !== ''
         || STAT_KEYS.some((k) => rangeActive(statRanges[k]));
 
     const clearFilters = () => {
         setSearch(''); setPcOnly(false); setMegaOnly(false); setRegionalOnly(false);
-        setTypeFilter1(''); setTypeFilter2(''); setAbilityId(null); setGeneration('');
+        setTypeFilter1(''); setTypeFilter2(''); setAbilityId(null); setGeneration(''); setStage('');
         setStatRanges({
             hp: { ...EMPTY_RANGE }, atk: { ...EMPTY_RANGE }, def: { ...EMPTY_RANGE },
             spa: { ...EMPTY_RANGE }, spd: { ...EMPTY_RANGE }, spe: { ...EMPTY_RANGE },
@@ -341,6 +365,32 @@ function PokemonPage() {
                             <SelectItem value="__any">Any gen</SelectItem>
                             {GENERATIONS.map((g) => (
                                 <SelectItem key={g} value={String(g)}>Gen {g}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between gap-2">
+                        <label className="text-xs font-medium text-muted-foreground">Stage</label>
+                        <button
+                            type="button"
+                            onClick={() => setStageLabelStyle((s) => (s === 'tcg' ? 'simple' : 'tcg'))}
+                            title="Toggle stage label style (TCG ⇄ Simple)"
+                            className="text-[10px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                        >
+                            {stageLabelStyle === 'tcg' ? 'TCG ⇄' : 'Simple ⇄'}
+                        </button>
+                    </div>
+                    <Select
+                        value={stage || '__any'}
+                        onValueChange={(v) => { setStage(v === '__any' ? '' : v); resetPage(); }}
+                    >
+                        <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__any">Any stage</SelectItem>
+                            {STAGE_VALUES.map((v) => (
+                                <SelectItem key={v} value={v}>{STAGE_LABELS[stageLabelStyle][v]}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -508,7 +558,7 @@ function PokemonPage() {
                                             {p.stats.bst}
                                         </TableCell>
                                         <TableCell className="text-center text-muted-foreground tabular-nums">
-                                            {p.generation ?? '—'}
+                                            {p.generation ?? ', '}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">

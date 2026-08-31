@@ -177,7 +177,7 @@ function StatsGrid({ member }: { member: TeamMemberDetail }) {
                                     : 'text-muted-foreground',
                             )}
                         >
-                            {ev > 0 ? ev : '—'}
+                            {ev > 0 ? ev : ', '}
                         </div>
                     );
                 })}
@@ -281,7 +281,7 @@ export function MemberCard({ member }: { member: TeamMemberDetail }) {
                                     </PopoverContent>
                                 </Popover>
                             ) : (
-                                <span className="text-foreground font-medium">—</span>
+                                <span className="text-foreground font-medium">, </span>
                             )}
                         </span>
                     </div>

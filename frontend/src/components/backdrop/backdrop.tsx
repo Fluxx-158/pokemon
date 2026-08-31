@@ -1,4 +1,4 @@
-// Backdrop renderer — mounted once at the top of <App />.
+// Backdrop renderer, mounted once at the top of <App />.
 // Sits at z-index: -2, fixed full-screen, pointer-events: none.
 // The dot grid is painted by body::after (in backgrounds.css) so it
 // always renders ON TOP of whatever this component shows.
@@ -45,7 +45,7 @@ export function Backdrop() {
     }
 
     // Custom upload: image. Vite serves the file at the /backdrops/<name>
-    // URL the backend returned — no Object URL juggling.
+    // URL the backend returned, no Object URL juggling.
     if (custom?.kind === 'image') {
         return (
             <div

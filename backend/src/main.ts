@@ -32,11 +32,11 @@ async function bootstrap() {
     //
     // Type cast: @fastify/static@7 is typed against Fastify 5 but
     // @nestjs/platform-fastify@10 still exposes Fastify 4's register signature,
-    // so the plugin type doesn't structurally match. Runtime is fine —
+    // so the plugin type doesn't structurally match. Runtime is fine, 
     // fastify@5 is the installed peer. Routing through `unknown` makes the
     // cast intentional (instead of `as never`, which silently swallows any
     // future signature change). When platform-fastify upgrades to v11
-    // (Fastify-5-typed), drop the cast — TS will then accept the plugin
+    // (Fastify-5-typed), drop the cast, TS will then accept the plugin
     // directly and flag the cast as redundant.
     type AppRegister = Parameters<typeof app.register>[0];
     await app.register(fastifyStatic as unknown as AppRegister, {
@@ -46,7 +46,7 @@ async function bootstrap() {
     });
 
     const port = Number(process.env.PORT) || 3000;
-    // Bind to loopback only — keeps the API off the LAN so other devices on
+    // Bind to loopback only, keeps the API off the LAN so other devices on
     // the same network can't reach it.
     await app.listen({ port, host: '127.0.0.1' });
     console.log(`API listening on http://localhost:${port}`);

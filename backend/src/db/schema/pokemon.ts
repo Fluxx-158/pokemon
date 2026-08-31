@@ -26,6 +26,10 @@ export const PokemonTable = mysqlTable(
         isMega: tinyint('is_mega').notNull().default(0),
         isRegional: tinyint('is_regional').notNull().default(0),
         regionVariant: varchar('region_variant', { length: 16 }),
+        // Evolution stage: baby | basic | stage1 | stage2 | mega. Derived from the
+        // PokeAPI evolution chain (see scripts/sync-evolution-stages.ts); mega rows
+        // are overridden to 'mega'. Non-evolving species default to 'basic'.
+        stage: varchar('stage', { length: 8 }).notNull().default('basic'),
         pcAvailable: tinyint('pc_available').notNull().default(1),
         pcNotes: text('pc_notes'),
     },

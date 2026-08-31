@@ -10,6 +10,7 @@ import {
     DEFENDER_IMMUNITY_ABILITIES,
     TYPE_RESIST_BERRIES,
 } from '@/lib/damage-calc';
+import { cn } from '@/lib/utils';
 
 export interface ModifierState {
     weather: 'clear' | 'sun' | 'rain' | 'snow' | 'sand';
@@ -40,9 +41,12 @@ export const EMPTY_MODIFIERS: ModifierState = {
 interface Props {
     value: ModifierState;
     onChange: (next: ModifierState) => void;
+    // Spread only applies in doubles; in singles the toggle is a no-op so we
+    // disable it. Defaults to true to preserve the existing doubles behaviour.
+    isDoubles?: boolean;
 }
 
-export function ModifierPanel({ value, onChange }: Props) {
+export function ModifierPanel({ value, onChange, isDoubles = true }: Props) {
     const set = <K extends keyof ModifierState>(key: K, v: ModifierState[K]) =>
         onChange({ ...value, [key]: v });
 
@@ -112,7 +116,12 @@ export function ModifierPanel({ value, onChange }: Props) {
                 </Field>
 
                 <Toggles>
-                    <Toggle label="Spread move (×0.75)" checked={value.spread} onChange={(v) => set('spread', v)} />
+                    <Toggle
+                        label={isDoubles ? 'Spread move (×0.75)' : 'Spread move (singles: no ×0.75)'}
+                        checked={isDoubles && value.spread}
+                        onChange={(v) => set('spread', v)}
+                        disabled={!isDoubles}
+                    />
                     <Toggle label="Attacker burned (×0.5 physical)" checked={value.burned} onChange={(v) => set('burned', v)} />
                     <Toggle label="Attacker type-boost item (×1.2)" checked={value.attackerItemBoost} onChange={(v) => set('attackerItemBoost', v)} />
                     <Toggle label="Attacker Adaptability (STAB ×2)" checked={value.adaptability} onChange={(v) => set('adaptability', v)} />
@@ -141,10 +150,10 @@ function Toggles({ children }: { children: React.ReactNode }) {
     );
 }
 
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ label, checked, onChange, disabled = false }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
     return (
-        <label className="flex items-center gap-2 cursor-pointer select-none text-xs">
-            <Checkbox checked={checked} onCheckedChange={(v) => onChange(v === true)} />
+        <label className={cn('flex items-center gap-2 select-none text-xs', disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer')}>
+            <Checkbox checked={checked} disabled={disabled} onCheckedChange={(v) => onChange(v === true)} />
             <span>{label}</span>
         </label>
     );

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface Props {
     title: string;
-    /** Right-aligned text in the header — e.g., "1276 ENTRIES" or "GEN 1". */
+    /** Right-aligned text in the header, e.g., "1276 ENTRIES" or "GEN 1". */
     meta?: ReactNode;
     /** Adds a subtle scanline overlay on the screen body. Default off. */
     scanlines?: boolean;

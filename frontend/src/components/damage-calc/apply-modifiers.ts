@@ -41,7 +41,9 @@ export function applyModifiers(
         isPhysical: ctx.isPhysical,
         weatherMod: weatherMultiplier(mods.weather, ctx.moveType),
         isBurned: mods.burned,
-        isSpread: mods.spread,
+        // A spread move only hits multiple targets (and takes the ×0.75) in
+        // doubles. In singles it hits one target → no spread reduction.
+        isSpread: ctx.isDoubles && mods.spread,
         screenMod: screenMultiplier(mods.screen, ctx.isPhysical, ctx.isDoubles),
         itemMod: mods.attackerItemBoost ? 1.2 : 1.0,
         adaptability: mods.adaptability,

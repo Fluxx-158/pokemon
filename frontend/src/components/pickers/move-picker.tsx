@@ -32,7 +32,7 @@ export function MovePicker({ pokemonId, value, onChange, excludeMoveIds = [] }: 
         enabled: pokemonId !== null,
     });
 
-    // Dedupe by move id — a single move can appear under multiple learn methods.
+    // Dedupe by move id, a single move can appear under multiple learn methods.
     const uniqueMoves = useMemo(() => {
         if (!data?.moves) return [] as PokemonMoveEntry[];
         const seen = new Map<number, PokemonMoveEntry>();
@@ -121,7 +121,7 @@ export function MovePicker({ pokemonId, value, onChange, excludeMoveIds = [] }: 
                                                 </span>
                                                 <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                                 <span className="text-[10px] text-muted-foreground tabular-nums">
-                                                    {m.power ?? '—'}/{m.accuracy === null ? '—' : m.accuracy}/{m.ppPc}
+                                                    {m.power ?? ', '}/{m.accuracy === null ? ', ' : m.accuracy}/{m.ppPc}
                                                 </span>
                                                 {!m.pcAvailable && (
                                                     <span className="text-[10px] text-amber-700 dark:text-amber-300">

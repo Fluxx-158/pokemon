@@ -40,6 +40,7 @@ export interface PokemonListItem {
     type2: string | null;
     stats: PokemonStats;
     generation: number | null;
+    stage: string;
     isMega: boolean;
     isRegional: boolean;
     regionVariant: string | null;
@@ -96,6 +97,39 @@ export interface PokemonBaseForm {
     stats: PokemonStats;
 }
 
+export interface UsageEntry {
+    rank: number;
+    name: string;
+    refId: number | null;
+    percentage: number | null;
+}
+export interface UsageNature {
+    rank: number;
+    name: string;
+    percentage: number | null;
+    statUp: string | null;
+    statDown: string | null;
+}
+export interface UsageSpread {
+    rank: number;
+    percentage: number | null;
+    evs: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
+}
+export interface UsageBlock {
+    moves: UsageEntry[];
+    items: UsageEntry[];
+    abilities: UsageEntry[];
+    natures: UsageNature[];
+    spreads: UsageSpread[];
+    teammates: UsageEntry[];
+}
+export interface PokemonUsage {
+    doubles: UsageBlock | null;
+    singles: UsageBlock | null;
+    sourceGeneratedAt: string | null;
+    sourceSeason: string | null;
+}
+
 export interface PokemonDetail extends PokemonListItem {
     isDefault: boolean;
     pcNotes: string | null;
@@ -103,6 +137,7 @@ export interface PokemonDetail extends PokemonListItem {
     moves: PokemonMoveEntry[];
     megaEvolutions: PokemonMegaEvolutionEntry[];
     baseForm: PokemonBaseForm | null;
+    usage: PokemonUsage;
 }
 
 export function getTypes(): Promise<TypeListItem[]> {
@@ -129,10 +164,13 @@ export interface TeamListMember {
     isMegaHolder: boolean;
 }
 
+export type TeamFormat = 'doubles' | 'singles' | 'both';
+
 export interface TeamListItem {
     id: number;
     name: string;
     sourceFolder: string;
+    format: TeamFormat;
     memberCount: number;
     megaHolderSlot: number | null;
     members: TeamListMember[];
@@ -143,6 +181,8 @@ export interface TeamNotes {
     lead_pair?: string;
     back_pair?: string;
     mega_holder?: string;
+    lead?: string;
+    bring_three?: string;
     other?: string[];
 }
 
@@ -173,7 +213,7 @@ export interface TeamMemberDetail {
         displayName: string;
         type1: string;
         type2: string | null;
-        // No `bst` here — the team detail endpoint returns just the six base
+        // No `bst` here, the team detail endpoint returns just the six base
         // stats; BST isn't useful for in-team computations.
         baseStats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
         isMega: boolean;
@@ -255,6 +295,7 @@ export interface TeamDetail {
     id: number;
     name: string;
     sourceFolder: string;
+    format: TeamFormat;
     notes: TeamNotes | null;
     megaHolderSlot: number | null;
     createdAt: string;
@@ -285,7 +326,7 @@ export function updateTeam(id: number, req: { markdown: string }): Promise<TeamD
     return apiPut<TeamDetail>(`/teams/${id}`, req);
 }
 
-export function renameTeam(id: number, req: { name?: string; sourceFolder?: string }): Promise<TeamDetail> {
+export function renameTeam(id: number, req: { name?: string; sourceFolder?: string; format?: TeamFormat }): Promise<TeamDetail> {
     return apiPatch<TeamDetail>(`/teams/${id}`, req);
 }
 
@@ -311,6 +352,105 @@ export function updateMatchup(id: number, slug: string, req: { markdown: string 
 
 export function deleteMatchup(id: number, slug: string): Promise<void> {
     return apiDelete(`/teams/${id}/matchups/${encodeURIComponent(slug)}`);
+}
+
+// ---- Analysis: partner-pick / weakness-patch (F3) ----
+export interface PartnerWeakness {
+    type: string;
+    weakCount: number;
+    threat: number; // 0..1 meta threat weight
+}
+export interface PartnerSuggestion {
+    pokemonId: number;
+    name: string;
+    displayName: string;
+    assumedAbility: string | null;
+    score: number; // 0..1
+    reasons: string[];
+}
+export interface PartnerResponse {
+    format: 'doubles' | 'singles';
+    sourceGeneratedAt: string | null;
+    sourceSeason: string | null;
+    weightedWeaknesses: PartnerWeakness[];
+    offensiveGaps: string[];
+    suggestions: PartnerSuggestion[];
+}
+export interface PartnerRequest {
+    format: 'doubles' | 'singles';
+    members: Array<{ pokemonId: number; ability: string | null; moveTypes: string[] }>;
+}
+
+export function getPartnerSuggestions(req: PartnerRequest): Promise<PartnerResponse> {
+    return apiPost<PartnerResponse>('/analysis/partners', req);
+}
+
+export interface MetaMon {
+    pokemonId: number;
+    name: string;
+    displayName: string;
+    type1: string;
+    type2: string | null;
+    presence: number;          // popularity weight
+    offensiveTypes: string[];  // STAB + common move types
+}
+export interface MetaResponse {
+    format: 'doubles' | 'singles';
+    sourceGeneratedAt: string | null;
+    sourceSeason: string | null;
+    mons: MetaMon[];
+}
+
+export function getMetaMons(format: 'doubles' | 'singles', limit?: number): Promise<MetaResponse> {
+    const qs = new URLSearchParams({ format });
+    if (limit) qs.set('limit', String(limit));
+    return apiGet<MetaResponse>(`/analysis/meta?${qs.toString()}`);
+}
+
+export interface SpeedTierMon {
+    pokemonId: number;
+    name: string;
+    displayName: string;
+    type1: string;
+    type2: string | null;
+    baseSpe: number;
+    commonSpe: number;
+    fastSpe: number;
+    commonLabel: string;
+    speedAbility: string | null;
+    scarfCommon: boolean;
+    presence: number;
+}
+export interface SpeedTierResponse {
+    format: 'doubles' | 'singles';
+    sourceGeneratedAt: string | null;
+    sourceSeason: string | null;
+    mons: SpeedTierMon[];
+}
+
+export function getSpeedTiers(format: 'doubles' | 'singles', limit?: number): Promise<SpeedTierResponse> {
+    const qs = new URLSearchParams({ format });
+    if (limit) qs.set('limit', String(limit));
+    return apiGet<SpeedTierResponse>(`/analysis/speed-tiers?${qs.toString()}`);
+}
+
+export interface MetaTargetMove { displayName: string; type: string; power: number; damageClass: string; }
+export interface MetaTarget {
+    pokemonId: number;
+    name: string;
+    displayName: string;
+    type1: string;
+    type2: string | null;
+    ability: string | null;
+    natureName: string;
+    spreadLabel: string;
+    finalStats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
+    moves: MetaTargetMove[];
+    hasUsage: boolean;
+}
+
+export function getMetaTarget(format: 'doubles' | 'singles', pokemonId: number): Promise<MetaTarget> {
+    return apiGet<MetaTarget>(`/analysis/meta-target?format=${format}&pokemonId=${pokemonId}`);
 }
 
 export interface ItemListItem {

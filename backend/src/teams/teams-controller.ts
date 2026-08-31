@@ -35,13 +35,14 @@ const UpdateStrategySchema = z.object({
 });
 class UpdateStrategyDto extends createZodDto(UpdateStrategySchema) {}
 
-// PATCH body — both fields optional; pass at least one.
+// PATCH body, all fields optional; pass at least one.
 const RenameTeamSchema = z.object({
     name: z.string().min(1).optional(),
     sourceFolder: z.string().min(1).optional(),
+    format: z.enum(['doubles', 'singles', 'both']).optional(),
 }).refine(
-    (v) => v.name !== undefined || v.sourceFolder !== undefined,
-    { message: 'Provide at least one of name or sourceFolder' },
+    (v) => v.name !== undefined || v.sourceFolder !== undefined || v.format !== undefined,
+    { message: 'Provide at least one of name, sourceFolder, or format' },
 );
 class RenameTeamDto extends createZodDto(RenameTeamSchema) {}
 
@@ -131,6 +132,7 @@ export class TeamsController {
         return this.service.rename(id, {
             name: body.name,
             sourceFolder: body.sourceFolder,
+            format: body.format,
         });
     }
 

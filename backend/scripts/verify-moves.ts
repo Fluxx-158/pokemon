@@ -18,10 +18,10 @@ const SPOT_CHECKS: SpotCheck[] = [
     // PP overrides
     { name: 'protect',     expectType: 'normal',  expectClass: 'status',   expectPpMainline: 10, expectPpPc: 8,  expectPriority: 4, expectPcChanged: true },
     { name: 'earthquake',  expectType: 'ground',  expectClass: 'physical', expectPower: 100, expectAccuracy: 100, expectPpMainline: 10, expectPpPc: 12, expectPcChanged: true },
-    // Slicing — PC additions
+    // Slicing, PC additions
     { name: 'dragon-claw', expectType: 'dragon',  expectClass: 'physical', expectPower: 80,  expectAccuracy: 100, expectIsSlicing: true,  expectPcChanged: true },
     { name: 'shadow-claw', expectType: 'ghost',   expectClass: 'physical', expectPower: 70,  expectAccuracy: 100, expectIsSlicing: true,  expectPcChanged: true },
-    // Slicing — mainline (NOT pc_changed)
+    // Slicing, mainline (NOT pc_changed)
     { name: 'slash',       expectType: 'normal',  expectClass: 'physical', expectPower: 70,  expectAccuracy: 100, expectIsSlicing: true,  expectPcChanged: false },
     { name: 'leaf-blade',  expectType: 'grass',   expectClass: 'physical', expectPower: 90,  expectIsSlicing: true,  expectPcChanged: false },
     { name: 'sacred-sword', expectType: 'fighting', expectClass: 'physical', expectPower: 90, expectIsSlicing: true, expectPcChanged: false },
@@ -30,7 +30,7 @@ const SPOT_CHECKS: SpotCheck[] = [
     { name: 'fake-out',    expectType: 'normal',  expectClass: 'physical', expectPriority: 3,  expectIsSlicing: false, expectPcChanged: false },
     { name: 'hyper-beam',  expectType: 'normal',  expectClass: 'special',  expectPower: 150, expectAccuracy: 90 },
     { name: 'thunder-wave', expectType: 'electric', expectClass: 'status', expectAccuracy: 90 },
-    // Dragon Claw / Shadow Claw not slicing on mainline — confirm pc_changed flag captures the difference
+    // Dragon Claw / Shadow Claw not slicing on mainline, confirm pc_changed flag captures the difference
     { name: 'close-combat', expectType: 'fighting', expectClass: 'physical', expectPower: 120, expectIsSlicing: false },
 ];
 
@@ -55,9 +55,9 @@ async function main() {
     const ppDivergent = ppDivergentRows[0].count;
 
     console.log(`moves total:           ${total}  (expected 900+)`);
-    console.log(`is_slicing=1:          ${slicing}  (expected 27 — 25 mainline + 2 PC additions)`);
-    console.log(`pc_changed=1:          ${pcChanged}  (expected 4 — Protect, Earthquake, Dragon Claw, Shadow Claw)`);
-    console.log(`pp_pc != pp_mainline:  ${ppDivergent}  (expected 2 — Protect, Earthquake)`);
+    console.log(`is_slicing=1:          ${slicing}  (expected 27, 25 mainline + 2 PC additions)`);
+    console.log(`pc_changed=1:          ${pcChanged}  (expected 4, Protect, Earthquake, Dragon Claw, Shadow Claw)`);
+    console.log(`pp_pc != pp_mainline:  ${ppDivergent}  (expected 2, Protect, Earthquake)`);
     console.log('');
 
     let pass = 0;

@@ -1,4 +1,4 @@
-// Shared query-string coercions. Keep these tiny — anything past truthy/intish
+// Shared query-string coercions. Keep these tiny, anything past truthy/intish
 // belongs in a per-route zod schema, not a generic helper.
 
 // `?flag=true` and `?flag=1` count as true, everything else (including

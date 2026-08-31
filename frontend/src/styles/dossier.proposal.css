@@ -1,5 +1,5 @@
 /*
- * DOSSIER — proposal stylesheet for the Pokemon Champions prep app.
+ * DOSSIER, proposal stylesheet for the Pokemon Champions prep app.
  *
  * Design intent: a competitive-battle field manual / dossier.
  * Vintage technical-journal typography (variable serif headers, technical
@@ -14,9 +14,9 @@
  */
 
 /* ---------- Fonts ---------- */
-/* Fraunces  — variable serif with opsz + SOFT axes. Headers, displays. */
-/* Plex Sans — technical sans with character. Body. */
-/* Plex Mono — matching mono. Stats, damage rolls, slugs. */
+/* Fraunces, variable serif with opsz + SOFT axes. Headers, displays. */
+/* Plex Sans, technical sans with character. Body. */
+/* Plex Mono, matching mono. Stats, damage rolls, slugs. */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -113,7 +113,7 @@ html {
 }
 
 /* All headings get the serif. opsz makes Fraunces tighten optically as it
-   grows — this is the move that sells the "real publication" feel. */
+   grows, this is the move that sells the "real publication" feel. */
 h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-feature-settings: 'ss01' on; /* stylistic alts: tighter g/a */
@@ -131,7 +131,7 @@ code, pre, .font-mono {
 }
 
 /* ---------- Page chrome ---------- */
-/* Subtle dot-grid background — the "engineering paper" cue. Renders only on
+/* Subtle dot-grid background, the "engineering paper" cue. Renders only on
    the body so cards punch through with a clean cream. */
 body {
     background-image:
@@ -158,7 +158,7 @@ body {
 
 /* ---------- Matted card ---------- */
 /* Use as: <div class="dossier-mat">…</div>                            */
-/* Outer hairline + inset frame — like a print mounted in a binder.    */
+/* Outer hairline + inset frame, like a print mounted in a binder.    */
 .dossier-mat {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -167,7 +167,7 @@ body {
     border-radius: var(--radius);
 }
 
-/* ---------- Type pill — TCG-card outline ---------- */
+/* ---------- Type pill, TCG-card outline ---------- */
 /* Theme-friendly: doesn't set color or font-size so the consumer's    */
 /* inline style (from typeColor) and className tweaks (text-[10px],   */
 /* text-xs, etc.) win. The signature elements are the black hairline */
@@ -215,7 +215,7 @@ body {
 
 /* ---------- Typewriter tab indicator ---------- */
 /* Use on the active tab marker. The 2px bar slides + briefly         */
-/* overshoots, then settles — feels like a typewriter stop.           */
+/* overshoots, then settles, feels like a typewriter stop.           */
 @keyframes dossier-type-in {
     0%   { transform: scaleX(0); transform-origin: left; }
     70%  { transform: scaleX(1.04); transform-origin: left; }
@@ -265,7 +265,7 @@ body {
 
 /* ---------- Stat reveal flap-board ---------- */
 /* Optional. Apply to .stat-cell when you want stats to "flip in" on  */
-/* tab change — like a flap board at a train station.                 */
+/* tab change, like a flap board at a train station.                 */
 @keyframes dossier-flip {
     from { transform: rotateX(-90deg); opacity: 0; }
     to   { transform: rotateX(0); opacity: 1; }

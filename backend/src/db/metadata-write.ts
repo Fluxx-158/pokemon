@@ -13,6 +13,6 @@ export async function touchMetadata(
     db: MySql2Database<Record<string, never>>,
     field: MetadataField,
 ): Promise<void> {
-    // Field is a typed enum — sql.raw is safe (no SQL injection risk).
+    // Field is a typed enum, sql.raw is safe (no SQL injection risk).
     await db.execute(sql.raw(`UPDATE metadata SET ${field} = NOW() WHERE id = 1`));
 }

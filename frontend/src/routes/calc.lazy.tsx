@@ -10,6 +10,7 @@ import { Sprite } from '@/components/sprite';
 import { EMPTY_MODIFIERS, ModifierPanel, type ModifierState } from '@/components/damage-calc/modifier-panel';
 import { ResultCard } from '@/components/damage-calc/result-card';
 import { dedupeDamagingMoves, runCalc } from '@/components/damage-calc/run-calc';
+import { FormatToggle, useCalcMode } from '@/components/damage-calc/format-toggle';
 import { MoveClassIcon } from '@/components/move-class-icon';
 import { PokemonPicker } from '@/components/pickers/pokemon-picker';
 import { TypePill } from '@/components/type-pill';
@@ -53,6 +54,7 @@ function CalcPage() {
     const [defenderSpd, setDefenderSpd] = useState(0);
     const [crit, setCrit] = useState(false);
     const [mods, setMods] = useState<ModifierState>(EMPTY_MODIFIERS);
+    const { mode, isDoubles, setMode } = useCalcMode();
 
     const attackerDetail = useQuery({
         queryKey: ['pokemon', attackerId],
@@ -118,16 +120,23 @@ function CalcPage() {
             isCritical: crit,
             mods,
             typeChart,
+            isDoubles,
         });
-    }, [attackerSummary, defenderSummary, selectedMove, typeChart, defenderHp, defenderDef, defenderSpd, atk, spa, level, crit, mods]);
+    }, [attackerSummary, defenderSummary, selectedMove, typeChart, defenderHp, defenderDef, defenderSpd, atk, spa, level, crit, mods, isDoubles]);
 
     return (
         <section className="flex flex-col gap-6 px-6 py-4">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold">Damage calculator</h1>
-                <p className="text-sm text-muted-foreground">
-                    Applies STAB, dual-type effectiveness, critical hits, and the 0.85-1.00 random roll. Weather, screens, burn, items, and ability modifiers are in the modifier panel.
-                </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-2xl font-bold">Damage calculator</h1>
+                    <p className="text-sm text-muted-foreground">
+                        Applies STAB, dual-type effectiveness, critical hits, and the 0.85-1.00 random roll. Weather, screens, burn, items, and ability modifiers are in the modifier panel.
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Format:</span>
+                    <FormatToggle mode={mode} onChange={setMode} />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -156,7 +165,7 @@ function CalcPage() {
                                             <span>{m.displayName}</span>
                                             <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                             <span className="text-[10px] text-muted-foreground tabular-nums">
-                                                {m.power}/{m.accuracy ?? '—'}
+                                                {m.power}/{m.accuracy ?? ', '}
                                             </span>
                                         </span>
                                     </SelectItem>
@@ -216,7 +225,7 @@ function CalcPage() {
                 </SideCard>
             </div>
 
-            <ModifierPanel value={mods} onChange={setMods} />
+            <ModifierPanel value={mods} onChange={setMods} isDoubles={isDoubles} />
 
             <ResultCard calc={calc} />
         </section>

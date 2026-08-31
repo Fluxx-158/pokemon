@@ -10,6 +10,7 @@ import { Sprite } from '@/components/sprite';
 import { EMPTY_MODIFIERS, ModifierPanel, type ModifierState } from '@/components/damage-calc/modifier-panel';
 import { ResultCard } from '@/components/damage-calc/result-card';
 import { dedupeDamagingMoves, runCalc } from '@/components/damage-calc/run-calc';
+import { FormatToggle, useCalcMode } from '@/components/damage-calc/format-toggle';
 import { MoveClassIcon } from '@/components/move-class-icon';
 import { PokemonPicker } from '@/components/pickers/pokemon-picker';
 import { TypePill } from '@/components/type-pill';
@@ -60,6 +61,7 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
 
     const [crit, setCrit] = useState(false);
     const [mods, setMods] = useState<ModifierState>(EMPTY_MODIFIERS);
+    const { mode, isDoubles, setMode, showToggle } = useCalcMode(team.format);
 
     const { data: pokemonList } = useQuery({ queryKey: ['pokemon'], queryFn: getPokemonList });
     const { data: typeChart } = useQuery({ queryKey: ['types', 'chart'], queryFn: getTypeChart });
@@ -117,9 +119,10 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
             isCritical: crit,
             mods,
             typeChart,
+            isDoubles,
         });
     }, [teamIsAttacker, teamMember, freeSummary, selectedMove, typeChart,
-        freeAtk, freeSpa, freeHp, freeDef, freeSpd, freeLevel, crit, mods]);
+        freeAtk, freeSpa, freeHp, freeDef, freeSpd, freeLevel, crit, mods, isDoubles]);
 
     if (team.members.length === 0) {
         return <p className="text-sm text-muted-foreground">No team members yet.</p>;
@@ -187,7 +190,7 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
                                         <span>{m.displayName}</span>
                                         <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                         <span className="text-[10px] text-muted-foreground tabular-nums">
-                                            {m.power}/{m.accuracy ?? '—'}
+                                            {m.power}/{m.accuracy ?? ', '}
                                         </span>
                                     </span>
                                 </SelectItem>
@@ -258,7 +261,7 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
                                             <span>{m.displayName}</span>
                                             <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                             <span className="text-[10px] text-muted-foreground tabular-nums">
-                                                {m.power}/{m.accuracy ?? '—'}
+                                                {m.power}/{m.accuracy ?? ', '}
                                             </span>
                                         </span>
                                     </SelectItem>
@@ -322,16 +325,24 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
                         Your team defends
                     </button>
                 </div>
-                <label className="ml-auto flex items-center gap-2 cursor-pointer select-none">
-                    <Checkbox checked={crit} onCheckedChange={(v) => setCrit(v === true)} />
-                    <span className="text-sm">Critical hit (×1.5)</span>
-                </label>
+                <div className="ml-auto flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Format:</span>
+                        {showToggle
+                            ? <FormatToggle mode={mode} onChange={setMode} />
+                            : <span className="rounded border px-2 py-1 text-xs font-medium capitalize">{mode}</span>}
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <Checkbox checked={crit} onCheckedChange={(v) => setCrit(v === true)} />
+                        <span className="text-sm">Critical hit (×1.5)</span>
+                    </label>
+                </div>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {teamIsAttacker ? teamCard('Attacker') : freeformCard('Attacker')}
                 {teamIsAttacker ? freeformCard('Defender') : teamCard('Defender')}
             </div>
-            <ModifierPanel value={mods} onChange={setMods} />
+            <ModifierPanel value={mods} onChange={setMods} isDoubles={isDoubles} />
             <ResultCard calc={calc} placeholder={
                 teamIsAttacker
                     ? 'Pick a defender to compute damage.'

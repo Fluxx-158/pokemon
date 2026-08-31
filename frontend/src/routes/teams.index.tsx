@@ -73,11 +73,16 @@ function TeamsListPage() {
                                         {team.memberCount} Pokemon · folder “{team.sourceFolder}”
                                     </span>
                                 </div>
-                                {team.megaHolderSlot !== null && (
-                                    <span className="dossier-foil rounded px-1.5 py-0.5 text-[10px] font-semibold">
-                                        Mega slot {team.megaHolderSlot}
+                                <div className="flex shrink-0 items-center gap-1.5">
+                                    <span className="rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                        {team.format}
                                     </span>
-                                )}
+                                    {team.megaHolderSlot !== null && (
+                                        <span className="dossier-foil rounded px-1.5 py-0.5 text-[10px] font-semibold">
+                                            Mega slot {team.megaHolderSlot}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex flex-wrap gap-1.5">

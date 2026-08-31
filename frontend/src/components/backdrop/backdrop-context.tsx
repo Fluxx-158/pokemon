@@ -71,7 +71,7 @@ export function BackdropProvider({ children }: { children: ReactNode }) {
 
         // Built-ins and the parchment default can be classified immediately.
         // For a name that isn't a built-in we have to wait for the API call
-        // to finish — otherwise we'd briefly mis-tag a custom as 'builtin',
+        // to finish, otherwise we'd briefly mis-tag a custom as 'builtin',
         // applying the wrong CSS readability rules during the load round-trip.
         if (active === DEFAULT_KEY) {
             document.documentElement.setAttribute('data-backdrop', 'parchment');

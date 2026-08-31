@@ -11,6 +11,7 @@ import { PokemonPicker } from '@/components/pickers/pokemon-picker';
 import { TypePill } from '@/components/type-pill';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { FormatToggle, useCalcMode } from '@/components/damage-calc/format-toggle';
 import { rankRecommendations, type Recommendation } from './scoring';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +22,10 @@ interface Props {
 export function LeadHelperForm({ team }: Props) {
     const [opponentIds, setOpponentIds] = useState<Array<number | null>>([null, null, null, null, null, null]);
     const [showAll, setShowAll] = useState(false);
+    const { mode, isDoubles, setMode, showToggle } = useCalcMode(team.format);
+    // Doubles: bring 4 of 6, lead 2. Singles: bring 3 of 6, lead 1.
+    const bringSize = isDoubles ? 4 : 3;
+    const leadSize = isDoubles ? 2 : 1;
 
     const { data: pokemonList } = useQuery({ queryKey: ['pokemon'], queryFn: getPokemonList });
     const { data: typeChart } = useQuery({ queryKey: ['types', 'chart'], queryFn: getTypeChart });
@@ -34,9 +39,9 @@ export function LeadHelperForm({ team }: Props) {
     }, [pokemonList, opponentIds]);
 
     const recommendations = useMemo(() => {
-        if (!typeChart || opponents.length === 0 || team.members.length < 4) return [];
-        return rankRecommendations(team.members, opponents, typeChart);
-    }, [team.members, opponents, typeChart]);
+        if (!typeChart || opponents.length === 0 || team.members.length < bringSize) return [];
+        return rankRecommendations(team.members, opponents, typeChart, { bringSize, leadSize });
+    }, [team.members, opponents, typeChart, bringSize, leadSize]);
 
     const top = recommendations.slice(0, showAll ? 10 : 3);
 
@@ -62,6 +67,15 @@ export function LeadHelperForm({ team }: Props) {
 
     return (
         <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Format:</span>
+                {showToggle
+                    ? <FormatToggle mode={mode} onChange={setMode} />
+                    : <span className="rounded border px-2 py-1 text-xs font-medium capitalize">{mode}</span>}
+                <span className="text-xs text-muted-foreground">
+                    {isDoubles ? 'bring 4 of 6, lead 2' : 'bring 3 of 6, lead 1'}
+                </span>
+            </div>
             <div className="rounded-md border p-4 flex flex-col gap-3">
                 <div className="flex items-baseline justify-between">
                     <h3 className="dossier-eyebrow">
@@ -114,6 +128,7 @@ export function LeadHelperForm({ team }: Props) {
                                 rec={rec}
                                 rank={i + 1}
                                 percentOfBest={percentOfBest(rec.scores.total)}
+                                candidateCount={recommendations.length}
                             />
                         ))}
                     </ol>
@@ -127,8 +142,8 @@ export function LeadHelperForm({ team }: Props) {
 }
 
 function RecommendationCard({
-    rec, rank, percentOfBest,
-}: { rec: Recommendation; rank: number; percentOfBest: number }) {
+    rec, rank, percentOfBest, candidateCount,
+}: { rec: Recommendation; rank: number; percentOfBest: number; candidateCount: number }) {
     const isLead = (id: number) => rec.leadIds.includes(id);
 
     return (
@@ -188,7 +203,7 @@ function RecommendationCard({
                             Score {rec.scores.total} <span className="text-muted-foreground">·</span> {percentOfBest}% of best
                         </div>
                         <p className="text-[11px] text-muted-foreground mb-2">
-                            Higher is better. Relative ranking, not capped to 100. The percent is rescaled across the 90-candidate set (worst = 0%, best = 100%).
+                            Higher is better. Relative ranking, not capped to 100. The percent is rescaled across the {candidateCount}-candidate set (worst = 0%, best = 100%).
                         </p>
                         <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 tabular-nums">
                             <span className="text-muted-foreground">Offensive (SE coverage)</span>

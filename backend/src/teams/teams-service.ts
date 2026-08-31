@@ -16,6 +16,7 @@ import {
     TeamMemberMovesTable,
     TeamMembersTable,
     TeamsTable,
+    type TeamFormat,
     type TeamNotesJson,
 } from '../db/schema/teams';
 import { TypesTable } from '../db/schema/types';
@@ -51,6 +52,20 @@ function normalizeMarkdown(markdown: string): string {
     return markdown.replace(/\r\n/g, '\n').replace(/\n*$/, '\n');
 }
 
+// Set the `- Format:` note in a team.md to `format`, so a quick format change
+// from the app survives a future re-seed. Replaces an existing Format bullet,
+// else inserts one under the Notes heading, else appends a Notes section.
+function upsertFormatLine(content: string, format: TeamFormat): string {
+    const line = `- Format: ${format}`;
+    if (/^-\s*Format:.*$/im.test(content)) {
+        return content.replace(/^-\s*Format:.*$/im, line);
+    }
+    if (/^##\s+Notes.*$/im.test(content)) {
+        return content.replace(/^(##\s+Notes.*)$/im, `$1\n${line}`);
+    }
+    return content.replace(/\n*$/, `\n\n## Notes\n${line}\n`);
+}
+
 export interface TeamListMember {
     id: number;
     slot: number;
@@ -63,6 +78,7 @@ export interface TeamListItem {
     id: number;
     name: string;
     sourceFolder: string;
+    format: TeamFormat;
     memberCount: number;
     megaHolderSlot: number | null;
     members: TeamListMember[];
@@ -176,13 +192,14 @@ export interface TeamDetail {
     id: number;
     name: string;
     sourceFolder: string;
+    format: TeamFormat;
     notes: TeamNotesJson | null;
     megaHolderSlot: number | null;
     createdAt: string;
     updatedAt: string;
     members: TeamMemberDetail[];
     // Raw strategy.md contents from disk, or null if no such file exists in
-    // the team's folder. Read fresh on each detail fetch — files are tiny
+    // the team's folder. Read fresh on each detail fetch, files are tiny
     // and the user can edit them outside the app.
     strategyMarkdown: string | null;
     matchups: MatchupSummary[];
@@ -243,7 +260,7 @@ export class TeamsService {
     }
 
     // Insert resolved members + their EVs / IVs / moves under a given
-    // team id. Shared between create() and update() — both use it inside
+    // team id. Shared between create() and update(), both use it inside
     // the same transaction `tx` so a throw at any point rolls everything
     // back. IVs are skipped when absent (read path supplies the 31s
     // default).
@@ -348,13 +365,14 @@ export class TeamsService {
             const [insertResult] = await tx.insert(TeamsTable).values({
                 name: parsed.name,
                 sourceFolder,
+                format: parsed.format,
                 notes: parsed.notes as TeamNotesJson,
             });
             const newTeamId = insertResult.insertId;
 
             await this.insertResolvedMembers(tx, newTeamId, resolved);
 
-            // File write inside the transaction — if mkdir/writeFile throw,
+            // File write inside the transaction, if mkdir/writeFile throw,
             // every preceding insert rolls back. recursive:false so an
             // unexpected pre-existing folder surfaces as EEXIST instead of
             // silently overwriting whatever was already there.
@@ -389,7 +407,7 @@ export class TeamsService {
     }
 
     async update(id: number, input: { markdown: string }): Promise<TeamDetail> {
-        // Existing team must exist; the source_folder stays put — renames are
+        // Existing team must exist; the source_folder stays put, renames are
         // a separate operation we don't support in v1.
         const existingRows = await this.datasource.db
             .select({ id: TeamsTable.id, sourceFolder: TeamsTable.sourceFolder })
@@ -428,6 +446,7 @@ export class TeamsService {
             await tx.update(TeamsTable)
                 .set({
                     name: parsed.name,
+                    format: parsed.format,
                     notes: parsed.notes as TeamNotesJson,
                 })
                 .where(eq(TeamsTable.id, id));
@@ -435,7 +454,7 @@ export class TeamsService {
             await this.insertResolvedMembers(tx, id, resolved);
 
             // Rewrite team.md last so a write failure rolls back the DB changes.
-            // mkdir is idempotent (recursive) — covers the rare case where the
+            // mkdir is idempotent (recursive), covers the rare case where the
             // folder was deleted out from under us. If we did create the
             // folder fresh and then writeFile fails, drop the empty folder so
             // the rolled-back DB and filesystem stay in sync.
@@ -476,7 +495,7 @@ export class TeamsService {
         // DB delete cascades through team_members → evs/ivs/moves.
         await this.datasource.db.delete(TeamsTable).where(eq(TeamsTable.id, id));
 
-        // Filesystem cleanup is best-effort — the DB is the source of truth.
+        // Filesystem cleanup is best-effort, the DB is the source of truth.
         // Strategy.md and matchups/ are user-curated content that we never
         // generated, so we never delete them; only team.md and an emptied
         // folder are ours to clean up.
@@ -495,7 +514,7 @@ export class TeamsService {
                     rmdirSync(folderPath);
                 }
             } catch {
-                // Same as above — best-effort.
+                // Same as above, best-effort.
             }
         }
     }
@@ -515,6 +534,7 @@ export class TeamsService {
                 id: TeamsTable.id,
                 name: TeamsTable.name,
                 sourceFolder: TeamsTable.sourceFolder,
+                format: TeamsTable.format,
                 createdAt: TeamsTable.createdAt,
             })
             .from(TeamsTable)
@@ -561,6 +581,7 @@ export class TeamsService {
             id: t.id,
             name: t.name,
             sourceFolder: t.sourceFolder,
+            format: t.format,
             memberCount: byTeam.get(t.id)?.length ?? 0,
             megaHolderSlot: megaSlotByTeam.get(t.id) ?? null,
             members: byTeam.get(t.id) ?? [],
@@ -693,7 +714,7 @@ export class TeamsService {
         ]);
 
         // PC availability is tracked per (pokemon_id, move_id) on pokemon_moves
-        // — pull the rows for these members' (pokemon, move) pairs so the UI
+        //pull the rows for these members' (pokemon, move) pairs so the UI
         // can flag illegal-in-PC choices (e.g. Incineroar/Knock Off).
         const memberPokemonIds = memberRows.map((m) => m.pokemonId);
         const moveIds = Array.from(new Set(moveRows.map((m) => m.id)));
@@ -740,7 +761,7 @@ export class TeamsService {
                 effect: m.effect,
                 // Default to true: a learnset row not in pokemon_moves means
                 // the move was added by some out-of-band route (event move,
-                // tutor we didn't import) — treat as legal unless flagged.
+                // tutor we didn't import), treat as legal unless flagged.
                 pcAvailable: pcInfo ? pcInfo.pcAvailable === 1 : true,
                 pcNotes: pcInfo?.pcNotes ?? null,
             });
@@ -817,6 +838,7 @@ export class TeamsService {
             id: team.id,
             name: team.name,
             sourceFolder: team.sourceFolder,
+            format: team.format,
             notes: team.notes,
             megaHolderSlot: megaSlot,
             createdAt: team.createdAt,
@@ -930,7 +952,7 @@ export class TeamsService {
     private validateSlug(slug: string): void {
         if (!VALID_SLUG.test(slug)) {
             throw new BusinessException({
-                message: `Invalid matchup slug: "${slug}" (use lowercase letters, digits, and single hyphens — e.g. "rain-ghost-froslass")`,
+                message: `Invalid matchup slug: "${slug}" (use lowercase letters, digits, and single hyphens, e.g. "rain-ghost-froslass")`,
                 code: 'MATCHUP_INVALID_SLUG',
                 httpStatus: 400,
             });
@@ -1014,12 +1036,13 @@ export class TeamsService {
         }
     }
 
-    async rename(id: number, input: { name?: string; sourceFolder?: string }): Promise<TeamDetail> {
+    async rename(id: number, input: { name?: string; sourceFolder?: string; format?: TeamFormat }): Promise<TeamDetail> {
         const rows = await this.datasource.db
             .select({
                 id: TeamsTable.id,
                 name: TeamsTable.name,
                 sourceFolder: TeamsTable.sourceFolder,
+                format: TeamsTable.format,
             })
             .from(TeamsTable)
             .where(eq(TeamsTable.id, id))
@@ -1055,14 +1078,15 @@ export class TeamsService {
 
         const nameChanged = newName !== undefined && newName !== current.name;
         const folderChanged = newFolder !== undefined && newFolder !== current.sourceFolder;
-        if (!nameChanged && !folderChanged) {
+        const formatChanged = input.format !== undefined && input.format !== current.format;
+        if (!nameChanged && !folderChanged && !formatChanged) {
             return this.findById(id);
         }
 
         if (folderChanged) {
             // Refuse to claim a folder another team already owns. The
             // filesystem-level collision (an unrelated directory at the new
-            // path) is detected naturally by renameSync below — we don't
+            // path) is detected naturally by renameSync below, we don't
             // pre-check via existsSync because that's TOCTOU-racy and
             // misleadingly suggested atomicity we didn't have.
             const existingDb = await this.datasource.db
@@ -1085,25 +1109,28 @@ export class TeamsService {
         // tx rolls back (DB) and the only side effect is a slightly
         // outdated team.md, which the next save fixes.
         await this.datasource.db.transaction(async (tx) => {
-            const updates: { name?: string; sourceFolder?: string } = {};
+            const updates: { name?: string; sourceFolder?: string; format?: TeamFormat } = {};
             if (nameChanged) updates.name = newName!;
             if (folderChanged) updates.sourceFolder = newFolder!;
+            if (formatChanged) updates.format = input.format!;
             await tx.update(TeamsTable).set(updates).where(eq(TeamsTable.id, id));
 
-            if (nameChanged) {
-                // Write to the OLD folder path — the rename hasn't happened yet.
+            // Keep team.md in sync (name header and/or Format note) BEFORE any
+            // folder rename, writing to the OLD path. Both edits go through one
+            // read-modify-write so a name+format change touches the file once.
+            if (nameChanged || formatChanged) {
                 const oldFolderPath = join(TEAMS_ROOT, current.sourceFolder);
                 const teamMdPath = join(oldFolderPath, 'team.md');
                 if (existsSync(teamMdPath)) {
-                    const content = readFileSync(teamMdPath, 'utf8');
-                    const replaced = content.replace(
-                        /^#\s+Team name:.*$/m,
-                        `# Team name: ${newName}`,
-                    );
-                    const finalContent = replaced === content
-                        ? `# Team name: ${newName}\n\n${content}`
-                        : replaced;
-                    writeFileSync(teamMdPath, finalContent, 'utf8');
+                    let content = readFileSync(teamMdPath, 'utf8');
+                    if (nameChanged) {
+                        const replaced = content.replace(/^#\s+Team name:.*$/m, `# Team name: ${newName}`);
+                        content = replaced === content ? `# Team name: ${newName}\n\n${content}` : replaced;
+                    }
+                    if (formatChanged) {
+                        content = upsertFormatLine(content, input.format!);
+                    }
+                    writeFileSync(teamMdPath, content, 'utf8');
                 }
             }
 
@@ -1114,7 +1141,7 @@ export class TeamsService {
                     try {
                         renameSync(oldPath, newPath);
                     } catch (err) {
-                        // EEXIST or EPERM lands here — translate to a
+                        // EEXIST or EPERM lands here, translate to a
                         // user-visible 409 so the tx rolls back cleanly.
                         const code = (err as NodeJS.ErrnoException).code;
                         if (code === 'EEXIST' || code === 'ENOTEMPTY' || code === 'EPERM') {
@@ -1127,7 +1154,7 @@ export class TeamsService {
                         throw err;
                     }
                 } else {
-                    // No folder on disk yet (rare — user deleted it).
+                    // No folder on disk yet (rare, user deleted it).
                     // mkdirSync with recursive:false fails on EEXIST.
                     try {
                         mkdirSync(newPath);
@@ -1259,7 +1286,7 @@ export class TeamsService {
         const folderPath = join(TEAMS_ROOT, rows[0].sourceFolder);
         const strategyPath = join(folderPath, 'strategy.md');
 
-        // Treat whitespace-only markdown as a clear request — delete the file
+        // Treat whitespace-only markdown as a clear request, delete the file
         // rather than persisting an empty playbook. Lets users blank a stale
         // strategy without leaving a one-byte file behind.
         const trimmed = input.markdown.trim();
@@ -1268,7 +1295,7 @@ export class TeamsService {
                 unlinkSync(strategyPath);
             }
         } else {
-            // Defensive — the team's folder should already exist (the team is
+            // Defensive, the team's folder should already exist (the team is
             // registered) but a user may have removed it manually.
             mkdirSync(folderPath, { recursive: true });
             writeFileSync(strategyPath, normalizeMarkdown(input.markdown), 'utf8');

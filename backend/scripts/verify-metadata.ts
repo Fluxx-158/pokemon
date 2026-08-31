@@ -30,7 +30,7 @@ async function main() {
     // Read the row.
     const [rows] = await conn.query<mysql.RowDataPacket[]>('SELECT * FROM metadata WHERE id = 1');
     if (rows.length === 0) {
-        console.log('  [FAIL] metadata row id=1 missing — run `npm run seed:metadata`');
+        console.log('  [FAIL] metadata row id=1 missing, run `npm run seed:metadata`');
         fail++;
     } else {
         const r = rows[0];

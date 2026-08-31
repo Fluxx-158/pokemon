@@ -1,6 +1,6 @@
 // Stat formulas for Pokemon Champions, level 50, with the 25-nature ±10% map.
 //
-// PC's EV system is NOT mainline — observed by reverse-engineering against
+// PC's EV system is NOT mainline, observed by reverse-engineering against
 // team.md final stats:
 //   Incineroar  base HP 95, EV 32, no-HP-nature  →  202
 //   Greninja    base SpA 103, EV 32, neutral SpA →  155
@@ -75,7 +75,7 @@ export function natureEffect(name: string): NatureEffect {
 }
 
 function rawAt50(base: number, iv: number): number {
-    // floor((2*base + iv) * 50/100) — the mainline base term, EV-free.
+    // floor((2*base + iv) * 50/100), the mainline base term, EV-free.
     return Math.floor((2 * base + iv) * LEVEL / 100);
 }
 

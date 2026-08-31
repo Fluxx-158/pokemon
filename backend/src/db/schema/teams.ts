@@ -13,10 +13,20 @@ import { ItemsTable } from './items';
 import { MovesTable } from './moves';
 import { PokemonTable } from './pokemon';
 
+// Competition format a team is registered for. `doubles` (register 6 / bring 4 /
+// 2 active) is the default and historical assumption; `singles` = register 6 /
+// bring 3 / lead 1; `both` = valid for either (tools expose a toggle).
+export type TeamFormat = 'doubles' | 'singles' | 'both';
+
 export interface TeamNotesJson {
     lead_pair?: string;
     back_pair?: string;
     mega_holder?: string;
+    // Singles-only equivalents of lead_pair/back_pair (single lead + the 3-of-6
+    // bring). Doubles teams leave these unset; singles teams leave the pair
+    // fields unset. See feature-plan F1 OQ3.
+    lead?: string;
+    bring_three?: string;
     other?: string[];
 }
 
@@ -29,6 +39,9 @@ export const TeamsTable = mysqlTable(
         // teams may share the same human name; the folder is what disambiguates
         // them on disk and pins the seeder back to the source markdown.
         sourceFolder: varchar('source_folder', { length: 255 }).notNull().unique(),
+        // doubles | singles | both. NOT NULL, defaults to doubles so existing
+        // rows + format-less team.md files keep their historical behaviour.
+        format: varchar('format', { length: 8 }).notNull().default('doubles').$type<TeamFormat>(),
         notes: json('notes').$type<TeamNotesJson>(),
         createdAt: datetime('created_at', { mode: 'string' }).notNull().default(sql`CURRENT_TIMESTAMP`),
         updatedAt: datetime('updated_at', { mode: 'string' }).notNull().default(sql`CURRENT_TIMESTAMP`),

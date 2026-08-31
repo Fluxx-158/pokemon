@@ -11,6 +11,7 @@ import * as Items from './schema/items';
 import * as Pokemon from './schema/pokemon';
 import * as MegaEvolutions from './schema/mega-evolutions';
 import * as Metadata from './schema/metadata';
+import * as Usage from './schema/usage';
 
 let __pool: Pool | undefined;
 let __drizzle: Drizzle | undefined;
@@ -37,6 +38,7 @@ function createDatasource(pool: Pool) {
             ...Pokemon,
             ...MegaEvolutions,
             ...Metadata,
+            ...Usage,
         },
     });
 }
@@ -63,7 +65,7 @@ export class Datasource implements OnModuleInit, OnModuleDestroy {
 
     get db(): Drizzle {
         if (!__drizzle) {
-            throw new Error('Datasource not initialized — onModuleInit has not run yet');
+            throw new Error('Datasource not initialized, onModuleInit has not run yet');
         }
         return __drizzle;
     }

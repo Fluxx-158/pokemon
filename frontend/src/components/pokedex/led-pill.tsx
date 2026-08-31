@@ -1,8 +1,8 @@
 // Compact status indicator with a tiny LED dot. Variants map to colour:
-//   ok      — green (PC-available, current, etc.)
-//   off     — gray  (not in PC, deprecated)
-//   region  — blue  (regional variant)
-//   mega    — red/foil (mega-evolved form)
+//   ok, green (PC-available, current, etc.)
+//   off, gray  (not in PC, deprecated)
+//   region, blue  (regional variant)
+//   mega, red/foil (mega-evolved form)
 
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
