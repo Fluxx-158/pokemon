@@ -203,6 +203,14 @@ async function loadLookups(db: MySql2Database<any>): Promise<Lookups> {
     };
 }
 
+// Reusable species name -> pokemon.id resolver (candidate translation + species
+// fallback), for other pipelines that ingest roster-style names (e.g. the
+// Limitless tournament aggregation in F2 phase 2).
+export async function loadPokemonResolver(db: MySql2Database<any>): Promise<(name: string) => number | null> {
+    const lk = await loadLookups(db);
+    return (name: string) => resolveSubject(name, lk);
+}
+
 function resolveSubject(rosterName: string, lk: Lookups): number | null {
     for (const cand of subjectCandidates(rosterName)) {
         const id = lk.pokemon.get(normKey(cand));

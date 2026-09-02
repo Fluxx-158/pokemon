@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { Datasource } from '../db/datasource';
 import { AbilitiesTable } from '../db/schema/abilities';
 import { ItemsTable } from '../db/schema/items';
@@ -9,6 +9,7 @@ import { PokemonAbilitiesTable, PokemonMovesTable, PokemonTable } from '../db/sc
 import { TypesTable } from '../db/schema/types';
 import { MetadataTable } from '../db/schema/metadata';
 import { PokemonUsageTable } from '../db/schema/usage';
+import { MetaSpeciesTable } from '../db/schema/meta-species';
 import { BusinessException } from '../infrastructure/exceptions';
 
 export interface PokemonStats {
@@ -128,6 +129,23 @@ export interface PokemonUsage {
     sourceSeason: string | null; // ranked season (e.g. "M4"), not the regulation
 }
 
+// F2 phases 2-3: tournament-derived meta stats (doubles). Limitless supplies
+// usage% / team win% / teammate cores; Pikalytics supplies the per-battle win
+// rate. Null when neither source has data for this species yet.
+export interface MetaTeammate { pokemonId: number | null; name: string; pct: number; }
+export interface PokemonMeta {
+    limitlessUsagePct: number | null;
+    limitlessTeamWinPct: number | null;
+    limitlessDecklists: number | null;
+    topTeammates: MetaTeammate[];
+    pikalyticsWinPct: number | null;
+    pikalyticsRecord: string | null;
+    pikalyticsDataDate: string | null;
+    tournamentSampleDecklists: number | null;
+    tournamentCount: number | null;
+    lastTournamentSync: string | null;
+}
+
 export interface PokemonDetail extends PokemonListItem {
     isDefault: boolean;
     pcNotes: string | null;
@@ -136,6 +154,7 @@ export interface PokemonDetail extends PokemonListItem {
     megaEvolutions: PokemonMegaEvolutionEntry[];
     baseForm: PokemonBaseForm | null;
     usage: PokemonUsage;
+    meta: PokemonMeta | null;
 }
 
 @Injectable()
@@ -299,7 +318,7 @@ export class PokemonService {
                 bst: number; isDefault: number;
             }>);
 
-        const [typeMap, abilityRows, moveRows, megaRows, baseFormRows, usageRows, metaRows] = await Promise.all([
+        const [typeMap, abilityRows, moveRows, megaRows, baseFormRows, usageRows, metaRows, metaSpeciesRows] = await Promise.all([
             this.loadTypeMap(),
             this.datasource.db
                 .select({
@@ -362,13 +381,25 @@ export class PokemonService {
                 .where(eq(PokemonUsageTable.pokemonId, id))
                 .orderBy(asc(PokemonUsageTable.format), asc(PokemonUsageTable.category), asc(PokemonUsageTable.rank)),
             this.datasource.db
-                .select({ generatedAt: MetadataTable.usageSourceGeneratedAt, season: MetadataTable.usageSourceSeason })
+                .select({
+                    generatedAt: MetadataTable.usageSourceGeneratedAt,
+                    season: MetadataTable.usageSourceSeason,
+                    tournamentSample: MetadataTable.tournamentSampleDecklists,
+                    tournamentCount: MetadataTable.tournamentCount,
+                    lastTournamentSync: MetadataTable.lastTournamentSync,
+                })
                 .from(MetadataTable)
                 .where(eq(MetadataTable.id, 1))
+                .limit(1),
+            this.datasource.db
+                .select()
+                .from(MetaSpeciesTable)
+                .where(and(eq(MetaSpeciesTable.pokemonId, id), eq(MetaSpeciesTable.format, 'doubles')))
                 .limit(1),
         ]);
 
         const usage = this.buildUsage(usageRows, metaRows[0]?.generatedAt ?? null, metaRows[0]?.season ?? null);
+        const meta = this.buildMeta(metaSpeciesRows[0] ?? null, metaRows[0] ?? null);
 
         const baseForm: PokemonBaseForm | null = baseFormRows.length > 0
             ? {
@@ -451,6 +482,35 @@ export class PokemonService {
                 notes: me.notes,
             })),
             usage,
+            meta,
+        };
+    }
+
+    // Assemble the F2 phase 2-3 meta block from the species' meta_species row
+    // plus tournament provenance. Returns null when there's no row at all.
+    private buildMeta(
+        row: typeof MetaSpeciesTable.$inferSelect | null,
+        provenance: { tournamentSample: number | null; tournamentCount: number | null; lastTournamentSync: Date | null } | null,
+    ): PokemonMeta | null {
+        if (!row) return null;
+        let teammates: MetaTeammate[] = [];
+        if (row.topTeammates) {
+            try {
+                const parsed = JSON.parse(row.topTeammates) as Array<{ pokemonId?: number | null; name?: string; pct?: number }>;
+                teammates = parsed.map((t) => ({ pokemonId: t.pokemonId ?? null, name: t.name ?? '', pct: t.pct ?? 0 }));
+            } catch { teammates = []; }
+        }
+        return {
+            limitlessUsagePct: row.limitlessUsagePct ?? null,
+            limitlessTeamWinPct: row.limitlessTeamWinPct ?? null,
+            limitlessDecklists: row.limitlessDecklists ?? null,
+            topTeammates: teammates,
+            pikalyticsWinPct: row.pikalyticsWinPct ?? null,
+            pikalyticsRecord: row.pikalyticsRecord ?? null,
+            pikalyticsDataDate: row.pikalyticsDataDate ?? null,
+            tournamentSampleDecklists: provenance?.tournamentSample ?? null,
+            tournamentCount: provenance?.tournamentCount ?? null,
+            lastTournamentSync: provenance?.lastTournamentSync ? new Date(provenance.lastTournamentSync).toISOString() : null,
         };
     }
 

@@ -16,5 +16,12 @@ export const MetadataTable = mysqlTable('metadata', {
     // the regulation (M-B), seasons roll monthly inside a regulation, and the
     // API only exposes the season, so UI labels read from this.
     usageSourceSeason: varchar('usage_source_season', { length: 16 }),
+    // F2 phase 2, Limitless tournament aggregation (play.limitlesstcg.com).
+    lastTournamentSync: timestamp('last_tournament_sync'),
+    tournamentSampleDecklists: int('tournament_sample_decklists'),
+    tournamentCount: int('tournament_count'),
+    // F2 phase 3, Pikalytics per-battle win-rate scrape.
+    lastWinrateSync: timestamp('last_winrate_sync'),
+    winrateSourceDataDate: varchar('winrate_source_data_date', { length: 16 }),
     pcPatchVersion: varchar('pc_patch_version', { length: 32 }),
 });

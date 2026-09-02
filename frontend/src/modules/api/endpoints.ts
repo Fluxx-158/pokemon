@@ -130,6 +130,22 @@ export interface PokemonUsage {
     sourceSeason: string | null;
 }
 
+// F2 phases 2-3: tournament-derived meta (doubles). Limitless usage% + team win
+// rate + cores; Pikalytics per-battle win rate. Null when no data for the mon.
+export interface MetaTeammate { pokemonId: number | null; name: string; pct: number; }
+export interface PokemonMeta {
+    limitlessUsagePct: number | null;
+    limitlessTeamWinPct: number | null;
+    limitlessDecklists: number | null;
+    topTeammates: MetaTeammate[];
+    pikalyticsWinPct: number | null;
+    pikalyticsRecord: string | null;
+    pikalyticsDataDate: string | null;
+    tournamentSampleDecklists: number | null;
+    tournamentCount: number | null;
+    lastTournamentSync: string | null;
+}
+
 export interface PokemonDetail extends PokemonListItem {
     isDefault: boolean;
     pcNotes: string | null;
@@ -138,6 +154,7 @@ export interface PokemonDetail extends PokemonListItem {
     megaEvolutions: PokemonMegaEvolutionEntry[];
     baseForm: PokemonBaseForm | null;
     usage: PokemonUsage;
+    meta: PokemonMeta | null;
 }
 
 export function getTypes(): Promise<TypeListItem[]> {

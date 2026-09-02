@@ -128,6 +128,14 @@ npm run sync:usage      # ~235 Pokemon × 2 formats; takes a minute
 npm run verify:usage    # optional sanity check (also runs automatically after sync:usage)
 ```
 
+**Tournament meta** (per-species usage%, win rate, and teammate cores, Reg M-B Doubles) is a separate, optional layer stored in `meta_species` and surfaced in the "Tournament meta" panel on each Pokemon page. It comes from two sources: [play.limitlesstcg.com](https://play.limitlesstcg.com) (recent tournament decklists, aggregated into usage% + a team win rate + cores) and [Pikalytics](https://www.pikalytics.com) (per-battle win rate). These are manual (not auto-synced), so run them when you want fresh tournament data:
+
+```bash
+cd backend
+npm run sync:tournaments   # aggregates the ~40 most recent Reg M-B events; self-verifies
+npm run sync:pikalytics    # per-battle win rate for the top meta species (run after sync:tournaments)
+```
+
 **Running fully offline?** Set `USAGE_SYNC_ENABLED=false` in `backend/.env` (see `.env.sample`). The app then makes **no network calls at all**, no startup or daily usage sync. Everything except the meta/usage features works with no internet: Pokédex, type chart + coverage, damage calc, team builder, teams, matchups, lead helper, and the EV optimizer (which falls back to neutral spread assumptions). The meta-dependent surfaces (the "vs Meta" coverage matrix, Suggested partners, meta rows in Speed tiers, and the Competitive-usage panel) show a small "unavailable" note instead of empty tables. If you *have* synced at least once, those features keep working offline from the DB, the internet is only ever needed to *refresh* the data.
 
 If you'd rather rebuild the data from upstream sources (slower, hits PokeAPI), the seed scripts still work:

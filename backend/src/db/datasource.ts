@@ -12,6 +12,7 @@ import * as Pokemon from './schema/pokemon';
 import * as MegaEvolutions from './schema/mega-evolutions';
 import * as Metadata from './schema/metadata';
 import * as Usage from './schema/usage';
+import * as MetaSpecies from './schema/meta-species';
 
 let __pool: Pool | undefined;
 let __drizzle: Drizzle | undefined;
@@ -39,6 +40,7 @@ function createDatasource(pool: Pool) {
             ...MegaEvolutions,
             ...Metadata,
             ...Usage,
+            ...MetaSpecies,
         },
     });
 }

@@ -19,6 +19,7 @@ import { AbilityDescription } from '@/components/ability-description';
 import { MoveClassIcon } from '@/components/move-class-icon';
 import { MoveDescription } from '@/components/move-description';
 import { UsagePanel } from '@/components/pokemon-detail/usage-panel';
+import { MetaPanel } from '@/components/pokemon-detail/meta-panel';
 import { TypePill } from '@/components/type-pill';
 import { typeColor } from '@/lib/type-colors';
 import { DexNumber } from '@/components/pokedex/dex-number';
@@ -425,6 +426,9 @@ function PokemonDetailPage() {
                     </ul>
                 </div>
             )}
+
+            {/* Tournament meta (Limitless + Pikalytics, doubles) */}
+            <MetaPanel meta={data.meta} />
 
             {/* Competitive usage (Reg M-B) */}
             <UsagePanel usage={data.usage} />
