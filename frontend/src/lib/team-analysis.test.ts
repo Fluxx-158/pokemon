@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-    analyzeTeam, buildMetaMatrix, defensiveMultiplier,
+    analyzeTeam, buildMetaMatrix, defensiveMultiplier, isRetypeAbility, retypeProfile,
     type AnalysisMember, type MetaMonLite, type TypeChart,
 } from './team-analysis';
 
@@ -10,6 +10,8 @@ const chart: TypeChart = {
     Fire: { Grass: 2, Steel: 2 },
     Grass: { Water: 2, Ground: 2 },
     Fighting: { Dark: 2, Steel: 2 },
+    Flying: { Fighting: 2 },
+    Psychic: { Fighting: 2 },
 };
 
 const mon = (over: Partial<AnalysisMember>): AnalysisMember => ({
@@ -34,6 +36,22 @@ describe('defensiveMultiplier, ability-aware (F3)', () => {
     });
     it('handles the real input shapes (lowercase API types, lowercase move type)', () => {
         expect(defensiveMultiplier(chart, 'dragon', 'ground', null, 'ice')).toBe(4);
+    });
+});
+
+describe('retypeProfile (Protean/Libero)', () => {
+    it('isRetypeAbility flags only Protean and Libero', () => {
+        expect(isRetypeAbility('Protean')).toBe(true);
+        expect(isRetypeAbility('Libero')).toBe(true);
+        expect(isRetypeAbility('Torrent')).toBe(false);
+        expect(isRetypeAbility(null)).toBe(false);
+    });
+    it('a mon that goes Fighting drops its base Fighting weakness but gains Flying/Psychic', () => {
+        // Base Water/Dark Greninja is Fighting-weak; as mono-Fighting it is not,
+        // but Flying and Psychic now hit it super-effectively.
+        const p = retypeProfile('Fighting', chart);
+        expect(p.weak).toEqual(expect.arrayContaining(['Flying', 'Psychic']));
+        expect(p.weak).not.toContain('Fighting');
     });
 });
 

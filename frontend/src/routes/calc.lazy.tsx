@@ -165,7 +165,7 @@ function CalcPage() {
                                             <span>{m.displayName}</span>
                                             <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                             <span className="text-[10px] text-muted-foreground tabular-nums">
-                                                {m.power}/{m.accuracy ?? ', '}
+                                                {m.power}/{m.accuracy ?? '-'}
                                             </span>
                                         </span>
                                     </SelectItem>

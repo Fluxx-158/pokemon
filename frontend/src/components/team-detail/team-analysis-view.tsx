@@ -11,12 +11,12 @@ import { Sprite } from '@/components/sprite';
 import { TypePill } from '@/components/type-pill';
 import { FormatToggle, useCalcMode } from '@/components/damage-calc/format-toggle';
 import {
-    analyzeTeam, ATTACKING_TYPES,
-    type AnalysisMember, type DefensiveCell, type OffensiveHit,
+    analyzeTeam, ATTACKING_TYPES, isRetypeAbility, retypeProfile,
+    type AnalysisMember, type DefensiveCell, type OffensiveHit, type TypeChart,
 } from '@/lib/team-analysis';
 import { MetaMatrix } from '@/components/team-detail/meta-matrix';
 import { PartnerSuggestions } from '@/components/team-detail/partner-suggestions';
-import { cn } from '@/lib/utils';
+import { capitalize, cn } from '@/lib/utils';
 
 export function TeamAnalysisView({ members, teamFormat }: { members: AnalysisMember[]; teamFormat?: TeamFormat }) {
     const { mode, isDoubles, setMode, showToggle } = useCalcMode(teamFormat);
@@ -59,6 +59,7 @@ export function TeamAnalysisView({ members, teamFormat }: { members: AnalysisMem
                     />
                     <PartnerSuggestions members={members} format={format} />
                     <DefensiveTable members={members} defensive={analysis.defensive} />
+                    <FlexibleTypingNote members={members} typeChart={typeChart} />
                     <OffensiveTable offensive={analysis.offensive} />
                 </>
             )}
@@ -192,6 +193,14 @@ function DefensiveTable({ members, defensive }: { members: AnalysisMember[]; def
                                         <div className="flex items-center gap-2">
                                             <Sprite id={m.pokemonId} className="h-7 w-7 shrink-0" />
                                             <span className="truncate font-medium">{m.displayName}</span>
+                                            {isRetypeAbility(m.ability) && (
+                                                <span
+                                                    title={`${m.ability} retypes to the move it uses; row shows base typing`}
+                                                    className="shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ring-inset ring-input text-muted-foreground"
+                                                >
+                                                    {m.ability}
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     {ATTACKING_TYPES.map((t) => {
@@ -205,13 +214,83 @@ function DefensiveTable({ members, defensive }: { members: AnalysisMember[]; def
                                         );
                                     })}
                                     <td className={cn('px-2 py-1 text-center tabular-nums', verdictCls)}>
-                                        {weakCount === 0 ? ', ' : weakCount}
+                                        {weakCount === 0 ? '-' : weakCount}
                                     </td>
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
+            </div>
+        </div>
+    );
+}
+
+// Protean/Libero members retype to the move they use, shifting their defensive
+// profile. The tables above show base typing (correct on switch-in and whenever
+// the mon isn't currently that type); this callout shows what each retype buys
+// and costs, so "Greninja can go Fighting to dodge Fighting" is visible without
+// distorting the team's weakness tallies.
+function FlexibleTypingNote({ members, typeChart }: { members: AnalysisMember[]; typeChart: TypeChart }) {
+    const retypers = members.filter((m) => isRetypeAbility(m.ability));
+    if (retypers.length === 0) return null;
+
+    return (
+        <div className="rounded-md border p-4 flex flex-col gap-3">
+            <div className="flex flex-wrap items-baseline gap-x-2">
+                <h2 className="dossier-eyebrow">Flexible typing (Protean / Libero)</h2>
+                <span className="text-xs text-muted-foreground">
+                    retypes to the move it uses, only base typing applies on switch-in
+                </span>
+            </div>
+            <div className="flex flex-col gap-4">
+                {retypers.map((m) => {
+                    const moveTypes = Array.from(new Set(
+                        m.moves.filter((mv) => mv.power !== null).map((mv) => capitalize(mv.type)),
+                    ));
+                    return (
+                        <div key={m.id} className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Sprite id={m.pokemonId} className="h-6 w-6 shrink-0" />
+                                <span className="font-medium">{m.displayName}</span>
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    base
+                                    <TypePill name={m.type1} className="text-[10px]" />
+                                    {m.type2 && <TypePill name={m.type2} className="text-[10px]" />}
+                                </span>
+                            </div>
+                            {moveTypes.length === 0 ? (
+                                <span className="text-xs italic text-muted-foreground">No damaging moves picked yet.</span>
+                            ) : (
+                                <ul className="flex flex-col gap-1 pl-1">
+                                    {moveTypes.map((t) => {
+                                        const p = retypeProfile(t, typeChart);
+                                        return (
+                                            <li key={t} className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                                                <span className="text-muted-foreground">as</span>
+                                                <TypePill name={t} className="text-[10px]" />
+                                                {p.weak.length > 0 ? (
+                                                    <span className="flex flex-wrap items-center gap-1">
+                                                        <span className="text-muted-foreground">weak:</span>
+                                                        {p.weak.map((w) => <TypePill key={w} name={w} className="text-[9px]" />)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-emerald-700 dark:text-emerald-300">no weaknesses</span>
+                                                )}
+                                                {p.immune.length > 0 && (
+                                                    <span className="flex flex-wrap items-center gap-1">
+                                                        <span className="text-muted-foreground">immune:</span>
+                                                        {p.immune.map((w) => <TypePill key={w} name={w} className="text-[9px]" />)}
+                                                    </span>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

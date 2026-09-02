@@ -558,7 +558,7 @@ function PokemonPage() {
                                             {p.stats.bst}
                                         </TableCell>
                                         <TableCell className="text-center text-muted-foreground tabular-nums">
-                                            {p.generation ?? ', '}
+                                            {p.generation ?? '-'}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">

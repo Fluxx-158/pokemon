@@ -105,6 +105,9 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
         return runCalc({
             attackerType1: teamIsAttacker ? teamMember.pokemon.type1 : freeSummary.type1,
             attackerType2: teamIsAttacker ? teamMember.pokemon.type2 : freeSummary.type2,
+            // The team member has a known ability (Protean/Libero => all-STAB);
+            // the free-pick attacker has none, so leave it base-typing.
+            attackerAbility: teamIsAttacker ? teamMember.ability.displayName : null,
             defenderType1: teamIsAttacker ? freeSummary.type1 : teamMember.pokemon.type1,
             defenderType2: teamIsAttacker ? freeSummary.type2 : teamMember.pokemon.type2,
             defenderHp: teamIsAttacker ? freeHp : teamMember.finalStats.hp,
@@ -190,7 +193,7 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
                                         <span>{m.displayName}</span>
                                         <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                         <span className="text-[10px] text-muted-foreground tabular-nums">
-                                            {m.power}/{m.accuracy ?? ', '}
+                                            {m.power}/{m.accuracy ?? '-'}
                                         </span>
                                     </span>
                                 </SelectItem>
@@ -261,7 +264,7 @@ export function TeamCalcTab({ team }: { team: TeamDetail }) {
                                             <span>{m.displayName}</span>
                                             <TypePill name={capitalize(m.type)} className="text-[10px]" />
                                             <span className="text-[10px] text-muted-foreground tabular-nums">
-                                                {m.power}/{m.accuracy ?? ', '}
+                                                {m.power}/{m.accuracy ?? '-'}
                                             </span>
                                         </span>
                                     </SelectItem>

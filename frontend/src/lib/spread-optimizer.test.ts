@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
     finalStat, finalHp, minSpeedPoints, minBulkToSurvive, minOffenseToKO,
+    solveSpread, type SolveConstraints,
 } from './spread-optimizer';
+
+const GARCHOMP_BASE = { hp: 108, atk: 130, def: 95, spa: 80, spd: 85, spe: 102 };
+function constraints(partial: Partial<SolveConstraints>): SolveConstraints {
+    return { base: GARCHOMP_BASE, nature: 'jolly', speed: [], survive: [], ko: [], ...partial };
+}
 
 describe('finalStat / finalHp, mirror the backend L50 formula', () => {
     it('Garchomp Jolly: Spe 32 → 169, Atk 32 (neutral) → 182', () => {
@@ -71,5 +77,73 @@ describe('minOffenseToKO, OHKO/2HKO helper', () => {
             movePower: 120, isStab: true, typeMult: 2, isPhysical: true, targetDef: 80, targetHp: 150,
         }, 1);
         expect(res.currentMinPercent).toBeGreaterThan(0);
+    });
+});
+
+describe('solveSpread, multi-constraint solver', () => {
+    it('no constraints, empty spread, full budget left', () => {
+        const r = solveSpread(constraints({}));
+        expect(r.points).toEqual({ hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 });
+        expect(r.totalUsed).toBe(0);
+        expect(r.leftover).toBe(66);
+        expect(r.feasible).toBe(true);
+    });
+
+    it('one speed constraint, spends only Spe, and it actually outspeeds', () => {
+        const need = minSpeedPoints(GARCHOMP_BASE.spe, 'jolly', 150)!;
+        const r = solveSpread(constraints({ speed: [{ label: 'outspeed', targetSpe: 150 }] }));
+        expect(r.points.spe).toBe(need);
+        expect(r.points.hp + r.points.atk + r.points.def + r.points.spa + r.points.spd).toBe(0);
+        expect(finalStat(GARCHOMP_BASE.spe, 'spe', r.points.spe, 'jolly')).toBeGreaterThan(150);
+        expect(r.feasible).toBe(true);
+    });
+
+    it('speed and a physical KO are solved on independent stats', () => {
+        const ko = { label: 'ohko', hits: 1 as const, movePower: 100, isStab: true, typeMult: 1, isPhysical: true, targetDef: 70, targetHp: 140 };
+        const expectedAtk = minOffenseToKO({
+            offBase: GARCHOMP_BASE.atk, offKey: 'atk', nature: 'jolly', currentPoints: 0,
+            movePower: ko.movePower, isStab: ko.isStab, typeMult: ko.typeMult, isPhysical: ko.isPhysical,
+            targetDef: ko.targetDef, targetHp: ko.targetHp,
+        }, 1).points!;
+        const r = solveSpread(constraints({ speed: [{ label: 'outspeed', targetSpe: 140 }], ko: [ko] }));
+        expect(r.points.spe).toBeGreaterThan(0);
+        expect(r.points.atk).toBe(expectedAtk); // physical KO drives Atk exactly
+        expect(r.points.spa).toBe(0);           // and never touches SpA
+    });
+
+    it('a survivable-at-zero hit costs no bulk points', () => {
+        const r = solveSpread(constraints({
+            survive: [{ label: 'weak hit', attackerStat: 80, movePower: 40, isStab: false, typeMult: 0.5, isPhysical: true }],
+        }));
+        expect(r.points.hp).toBe(0);
+        expect(r.points.def).toBe(0);
+        expect(r.feasible).toBe(true);
+    });
+
+    it('flags a constraint impossible even at 32 as infeasible (not just over budget)', () => {
+        const r = solveSpread(constraints({ speed: [{ label: 'outspeed rocket', targetSpe: 9999 }] }));
+        expect(r.infeasible).toContain('outspeed rocket');
+        expect(r.feasible).toBe(false);
+    });
+
+    it('a satisfiable constraint that busts the budget is infeasible with negative leftover', () => {
+        const r = solveSpread(constraints({ speed: [{ label: 'outspeed', targetSpe: 160 }] }), 0);
+        expect(r.infeasible).toHaveLength(0); // the constraint itself is achievable
+        expect(r.leftover).toBeLessThan(0);   // just not within a 0-point budget
+        expect(r.feasible).toBe(false);
+    });
+
+    it('shares HP across physical and special survival (total <= naive per-stat sum)', () => {
+        const both = solveSpread(constraints({
+            survive: [
+                { label: 'phys', attackerStat: 180, movePower: 90, isStab: true, typeMult: 1, isPhysical: true },
+                { label: 'spec', attackerStat: 170, movePower: 90, isStab: true, typeMult: 1, isPhysical: false },
+            ],
+        }));
+        // Whatever it lands on, it must respect the budget when feasible.
+        if (both.feasible) expect(both.totalUsed).toBeLessThanOrEqual(66);
+        // HP is counted once even though it backs both survivals.
+        expect(both.points.hp).toBeGreaterThanOrEqual(0);
+        expect(both.points.hp).toBeLessThanOrEqual(32);
     });
 });

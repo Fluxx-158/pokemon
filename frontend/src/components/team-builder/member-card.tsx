@@ -8,6 +8,7 @@ import { MovePicker } from '@/components/pickers/move-picker';
 import { NatureSelect } from '@/components/pickers/nature-select';
 import { PokemonPicker } from '@/components/pickers/pokemon-picker';
 import { OptimizePanel } from '@/components/team-builder/optimize-panel';
+import { SpreadSolverPanel } from '@/components/team-builder/spread-solver-panel';
 import { TypePill } from '@/components/type-pill';
 import {
     AccordionContent,
@@ -150,17 +151,31 @@ export function MemberCard({ slot, value, onChange, format = 'doubles' }: Props)
                     />
 
                     {value.pokemonId !== null && summary && value.nature && (
-                        <OptimizePanel
-                            pokemonId={value.pokemonId}
-                            baseStats={summary.stats}
-                            type1={summary.type1}
-                            type2={summary.type2}
-                            nature={value.nature}
-                            evs={value.evs}
-                            moveIds={value.moveIds}
-                            format={format}
-                            onApply={(key, points) => onChange({ ...value, evs: { ...value.evs, [key]: points } })}
-                        />
+                        <>
+                            <OptimizePanel
+                                pokemonId={value.pokemonId}
+                                baseStats={summary.stats}
+                                type1={summary.type1}
+                                type2={summary.type2}
+                                ability={summary.abilities.find((a) => a.id === value.abilityId)?.displayName ?? null}
+                                nature={value.nature}
+                                evs={value.evs}
+                                moveIds={value.moveIds}
+                                format={format}
+                                onApply={(key, points) => onChange({ ...value, evs: { ...value.evs, [key]: points } })}
+                            />
+                            <SpreadSolverPanel
+                                pokemonId={value.pokemonId}
+                                baseStats={summary.stats}
+                                type1={summary.type1}
+                                type2={summary.type2}
+                                ability={summary.abilities.find((a) => a.id === value.abilityId)?.displayName ?? null}
+                                nature={value.nature}
+                                moveIds={value.moveIds}
+                                format={format}
+                                onApply={(key, points) => onChange({ ...value, evs: { ...value.evs, [key]: points } })}
+                            />
+                        </>
                     )}
                 </div>
             </AccordionContent>

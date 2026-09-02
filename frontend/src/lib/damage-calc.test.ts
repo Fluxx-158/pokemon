@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-    typeEffectiveness, computeDamage, defenderImmuneByAbility, type DamageInput,
+    typeEffectiveness, computeDamage, defenderImmuneByAbility, isStabType, type DamageInput,
 } from './damage-calc';
 
 const chart = {
@@ -32,6 +32,24 @@ describe('defenderImmuneByAbility', () => {
         expect(defenderImmuneByAbility('Levitate', 'fire')).toBe(false);
         expect(defenderImmuneByAbility('none', 'ground')).toBe(false);
         expect(defenderImmuneByAbility(undefined, 'ground')).toBe(false);
+    });
+});
+
+describe('isStabType', () => {
+    it('matches a base type (either slot), case-insensitively', () => {
+        expect(isStabType('water', 'Water', 'Dark')).toBe(true);
+        expect(isStabType('Dark', 'water', 'dark')).toBe(true);
+        expect(isStabType('ice', 'Water', 'Dark')).toBe(false);
+        expect(isStabType('normal', 'Water', null)).toBe(false);
+    });
+    it('Protean / Libero grant STAB on every move regardless of type', () => {
+        // Greninja base Water/Dark, but Protean makes Ice Beam STAB too.
+        expect(isStabType('ice', 'Water', 'Dark', 'Protean')).toBe(true);
+        expect(isStabType('grass', 'Fire', null, 'Libero')).toBe(true);
+    });
+    it('a non-retyping ability falls back to the base-type check', () => {
+        expect(isStabType('ice', 'Water', 'Dark', 'Torrent')).toBe(false);
+        expect(isStabType('water', 'Water', 'Dark', 'Torrent')).toBe(true);
     });
 });
 

@@ -60,6 +60,37 @@ export function defensiveMultiplier(
     return mult;
 }
 
+// Abilities that retype the user to its move's type on attack (Protean/Libero).
+// The mon becomes MONO that type, so its defensive profile shifts each time it
+// attacks. We keep the team's weakness tallies on base typing (correct on
+// switch-in and when it isn't currently that type) and surface the retypes as
+// separate decision-support, rather than silently editing the counts.
+export const RETYPE_ABILITIES = new Set(['Protean', 'Libero']);
+
+export function isRetypeAbility(ability: string | null | undefined): boolean {
+    return ability != null && RETYPE_ABILITIES.has(ability);
+}
+
+export interface RetypeProfile {
+    moveType: string;     // the type the mon becomes (Title-case)
+    weak: string[];       // attacking types dealing >=2x to that mono-type
+    resist: string[];     // <1x but not 0
+    immune: string[];     // 0x
+}
+
+// Defensive profile of a mon that has retyped to `moveType` (now mono-type).
+export function retypeProfile(moveType: string, typeChart: TypeChart): RetypeProfile {
+    const t = capitalize(moveType);
+    const weak: string[] = [], resist: string[] = [], immune: string[] = [];
+    for (const atk of ATTACKING_TYPES) {
+        const mult = defensiveMultiplier(typeChart, t, null, null, atk);
+        if (mult === 0) immune.push(atk);
+        else if (mult >= 2) weak.push(atk);
+        else if (mult < 1) resist.push(atk);
+    }
+    return { moveType: t, weak, resist, immune };
+}
+
 // A minimal member shape the analysis needs, both TeamMemberDetail and a
 // hand-built builder member can map into this.
 export interface AnalysisMember {

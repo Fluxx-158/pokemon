@@ -39,8 +39,8 @@ export function MoveDescription({
                 <MoveClassIcon cls={damageClass} />
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground tabular-nums">
-                <span>Pow: <span className="text-foreground">{power ?? ', '}</span></span>
-                <span>Acc: <span className="text-foreground">{accuracy === null ? ', ' : `${accuracy}%`}</span></span>
+                <span>Pow: <span className="text-foreground">{power ?? '-'}</span></span>
+                <span>Acc: <span className="text-foreground">{accuracy === null ? '-' : `${accuracy}%`}</span></span>
                 <span>PP: <span className="text-foreground">{ppPc}</span></span>
                 {priority !== 0 && (
                     <span>Pri: <span className="text-foreground">{priority > 0 ? `+${priority}` : priority}</span></span>

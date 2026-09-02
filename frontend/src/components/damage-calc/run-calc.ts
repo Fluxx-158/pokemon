@@ -6,6 +6,7 @@
 
 import {
     computeDamage,
+    isStabType,
     typeEffectiveness,
 } from '@/lib/damage-calc';
 import type {
@@ -43,6 +44,9 @@ export type CalcMove = Pick<PokemonMoveEntry, 'type' | 'power' | 'damageClass'>;
 export interface RunCalcInput {
     attackerType1: string;
     attackerType2: string | null;
+    /** Attacker's ability display name, when known. Protean/Libero grant STAB on
+     *  every move; omit (or null) when the ability isn't specified. */
+    attackerAbility?: string | null;
     defenderType1: string;
     defenderType2: string | null;
     defenderHp: number;
@@ -66,10 +70,7 @@ export function runCalc(p: RunCalcInput): ResultCardCalc | null {
     if (p.defenderHp <= 0 || p.attackingStat <= 0 || p.defendingStat <= 0) return null;
 
     const isPhysical = p.move.damageClass === 'physical';
-    const isStab = (
-        p.move.type.toLowerCase() === p.attackerType1.toLowerCase()
-        || (p.attackerType2?.toLowerCase() === p.move.type.toLowerCase())
-    );
+    const isStab = isStabType(p.move.type, p.attackerType1, p.attackerType2, p.attackerAbility);
     const typeMult = typeEffectiveness(p.move.type, p.defenderType1, p.defenderType2, p.typeChart);
 
     const damageInput = applyModifiers(

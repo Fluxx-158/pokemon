@@ -13,7 +13,7 @@ import {
 } from '@/modules/api/endpoints';
 import { PokemonPicker } from '@/components/pickers/pokemon-picker';
 import { type EvBlock } from '@/components/pickers/ev-inputs';
-import { typeEffectiveness } from '@/lib/damage-calc';
+import { isStabType, typeEffectiveness } from '@/lib/damage-calc';
 import {
     minBulkToSurvive, minOffenseToKO, minSpeedPoints,
 } from '@/lib/spread-optimizer';
@@ -24,6 +24,8 @@ interface Props {
     baseStats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
     type1: string;
     type2: string | null;
+    /** This mon's chosen ability display name (Protean/Libero => all-STAB). */
+    ability: string | null;
     nature: string;
     evs: EvBlock;
     moveIds: Array<number | null>;
@@ -31,7 +33,7 @@ interface Props {
     onApply: (key: keyof EvBlock, points: number) => void;
 }
 
-export function OptimizePanel({ pokemonId, baseStats, type1, type2, nature, evs, moveIds, format, onApply }: Props) {
+export function OptimizePanel({ pokemonId, baseStats, type1, type2, ability, nature, evs, moveIds, format, onApply }: Props) {
     const [targetId, setTargetId] = useState<number | null>(null);
 
     const { data: typeChart } = useQuery({ queryKey: ['types', 'chart'], queryFn: getTypeChart });
@@ -87,7 +89,7 @@ export function OptimizePanel({ pokemonId, baseStats, type1, type2, nature, evs,
                             typeChart={typeChart} onApply={onApply}
                         />
                         <KoHelper
-                            target={target.data} myBase={baseStats} myTypes={myTypes} nature={nature}
+                            target={target.data} myBase={baseStats} myTypes={myTypes} myAbility={ability} nature={nature}
                             myMoves={myMoves} currentAtk={evs.atk} currentSpa={evs.spa}
                             typeChart={typeChart} onApply={onApply}
                         />
@@ -155,7 +157,7 @@ function SurviveHelper({ target, myBase, myTypes, nature, currentHp, currentDef,
     const res = minBulkToSurvive({
         attackerStat: isPhysical ? target.finalStats.atk : target.finalStats.spa,
         movePower: move.power,
-        isStab: [target.type1, target.type2].filter(Boolean).map((t) => capitalize(t as string)).includes(capitalize(move.type)),
+        isStab: isStabType(move.type, target.type1, target.type2, target.ability),
         typeMult: typeEffectiveness(move.type, myTypes[0], myTypes[1] ?? null, typeChart),
         isPhysical,
         defBaseHp: myBase.hp,
@@ -190,9 +192,9 @@ function SurviveHelper({ target, myBase, myTypes, nature, currentHp, currentDef,
     );
 }
 
-function KoHelper({ target, myBase, myTypes, nature, myMoves, currentAtk, currentSpa, typeChart, onApply }: {
+function KoHelper({ target, myBase, myTypes, myAbility, nature, myMoves, currentAtk, currentSpa, typeChart, onApply }: {
     target: import('@/modules/api/endpoints').MetaTarget;
-    myBase: Props['baseStats']; myTypes: string[]; nature: string; myMoves: MetaTargetMove[];
+    myBase: Props['baseStats']; myTypes: string[]; myAbility: string | null; nature: string; myMoves: MetaTargetMove[];
     currentAtk: number; currentSpa: number;
     typeChart: Record<string, Record<string, number>>; onApply: (k: keyof EvBlock, p: number) => void;
 }) {
@@ -208,7 +210,7 @@ function KoHelper({ target, myBase, myTypes, nature, myMoves, currentAtk, curren
         nature,
         currentPoints: isPhysical ? currentAtk : currentSpa,
         movePower: move.power,
-        isStab: myTypes.includes(capitalize(move.type)),
+        isStab: isStabType(move.type, myTypes[0], myTypes[1] ?? null, myAbility),
         typeMult: typeEffectiveness(move.type, target.type1, target.type2, typeChart),
         isPhysical,
         targetDef: isPhysical ? target.finalStats.def : target.finalStats.spd,

@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
 import {
     getItems,
     getPokemonDetail,
@@ -12,9 +13,12 @@ import {
     buildMarkdown,
     type NotesState,
 } from '@/components/team-builder/markdown';
+import { TeamAnalysisView } from '@/components/team-detail/team-analysis-view';
+import type { AnalysisMember } from '@/lib/team-analysis';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
     Select,
     SelectContent,
@@ -65,6 +69,7 @@ export function TeamForm({
     const [members, setMembers] = useState<MemberFormState[]>(initialMembers);
     const [notes, setNotes] = useState<NotesState>(initialNotes);
     const [openSlots, setOpenSlots] = useState<string[]>(['slot-1']);
+    const [showAnalysis, setShowAnalysis] = useState(false);
 
     const { data: pokemonList } = useQuery({
         queryKey: ['pokemon'],
@@ -84,6 +89,45 @@ export function TeamForm({
             enabled: m.pokemonId !== null,
         })),
     });
+
+    // Live analysis members: map the builder's in-progress slots onto the
+    // shared analysis shape. Types come from the (already-cached) pokemon list;
+    // ability + move typings come from each slot's detail query once loaded.
+    // Only picked slots contribute; a slot whose detail hasn't loaded yet still
+    // counts (typing from the list) so the defensive read is available early.
+    const analysisMembers = useMemo<AnalysisMember[]>(() => {
+        const out: AnalysisMember[] = [];
+        members.forEach((m, i) => {
+            if (m.pokemonId === null) return;
+            const listItem = pokemonList?.find((p) => p.id === m.pokemonId) ?? null;
+            const detail = detailQueries[i]?.data ?? null;
+            const src = detail ?? listItem;
+            if (!src) return; // nothing loaded for this slot yet
+            const ability =
+                detail?.abilities.find((a) => a.id === m.abilityId)?.displayName
+                ?? detail?.abilities[0]?.displayName
+                ?? listItem?.abilities[0]?.displayName
+                ?? null;
+            const moves = detail
+                ? m.moveIds
+                    .map((id) => (id === null ? null : detail.moves.find((mv) => mv.id === id) ?? null))
+                    .filter((mv): mv is NonNullable<typeof mv> => mv !== null)
+                    .map((mv) => ({ displayName: mv.displayName, type: mv.type, power: mv.power }))
+                : [];
+            out.push({
+                id: i + 1,
+                slot: i + 1,
+                pokemonId: m.pokemonId,
+                displayName: src.displayName,
+                type1: src.type1,
+                type2: src.type2,
+                ability,
+                moves,
+            });
+        });
+        return out;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [members, pokemonList, detailQueries.map((q) => q.data)]);
 
     const validation = useMemo(() => {
         const issues: string[] = [];
@@ -192,6 +236,29 @@ export function TeamForm({
                         onChange={(v) => setNotes((n) => ({ ...n, other: v }))} />
                 </div>
             </div>
+
+            {analysisMembers.length > 0 && (
+                <div className="rounded-md border">
+                    <button
+                        type="button"
+                        onClick={() => setShowAnalysis((s) => !s)}
+                        className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left"
+                    >
+                        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                            <span className="text-sm font-medium">Live team analysis</span>
+                            <span className="text-xs text-muted-foreground">
+                                {analysisMembers.length} of 6 picked · weaknesses, coverage, suggested partners
+                            </span>
+                        </span>
+                        <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', showAnalysis && 'rotate-180')} />
+                    </button>
+                    {showAnalysis && (
+                        <div className="border-t px-4 py-4">
+                            <TeamAnalysisView members={analysisMembers} teamFormat={notes.format} />
+                        </div>
+                    )}
+                </div>
+            )}
 
             {validation.length > 0 && (
                 <div className="rounded-md border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">

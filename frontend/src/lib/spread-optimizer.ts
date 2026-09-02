@@ -133,3 +133,108 @@ export function minOffenseToKO(i: KoInput, hits: 1 | 2): KoResult {
     }
     return { currentMinPercent, points };
 }
+
+// --- v2: multi-constraint solver ---------------------------------------------
+// Find one legal spread (each stat 0..32, total <= budget) that satisfies every
+// constraint at once, using the fewest points. Speed and offense reduce to
+// independent single-stat minima; survival couples HP with the defensive stat,
+// so we sweep HP (0..32) and, at each level, take the least Def/SpD that holds.
+// HP is shared across physical AND special survival, so the sweep captures that
+// trade-off. The global minimum is these minima summed (the stats don't overlap).
+
+export type PointBlock = { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
+export const EMPTY_POINTS: PointBlock = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+
+export interface SpeedReq { label: string; targetSpe: number; }
+export interface SurviveReq {
+    label: string; attackerStat: number; movePower: number;
+    isStab: boolean; typeMult: number; isPhysical: boolean;
+}
+export interface KoReq {
+    label: string; hits: 1 | 2; movePower: number; isStab: boolean;
+    typeMult: number; isPhysical: boolean; targetDef: number; targetHp: number;
+}
+export interface SolveConstraints {
+    base: PointBlock;       // the mon's base stats (hp field = base HP)
+    nature: string;
+    speed: SpeedReq[];
+    survive: SurviveReq[];
+    ko: KoReq[];
+}
+export interface SolveResult {
+    /** Every constraint met AND the spread fits the budget. */
+    feasible: boolean;
+    points: PointBlock;
+    totalUsed: number;
+    leftover: number;       // budget - totalUsed (negative => over budget)
+    infeasible: string[];   // labels that cannot be met even at 32 points on their stat(s)
+}
+
+export const DEFAULT_BUDGET = 66;
+
+// Least Def/SpD points (0..32) so every req survives at the given HP points.
+function minDefPoints(reqs: SurviveReq[], base: PointBlock, nature: string, hpPoints: number, key: 'def' | 'spd'): number | null {
+    if (reqs.length === 0) return 0;
+    const hp = finalHp(base.hp, hpPoints);
+    const defBase = key === 'def' ? base.def : base.spd;
+    for (let d = 0; d <= MAX_POINTS; d++) {
+        const defStat = finalStat(defBase, key, d, nature);
+        if (reqs.every((r) => dmgRange(r.attackerStat, defStat, r.movePower, r.isStab, r.typeMult, r.isPhysical, hp).max < hp)) return d;
+    }
+    return null;
+}
+
+export function solveSpread(c: SolveConstraints, budget = DEFAULT_BUDGET): SolveResult {
+    const points: PointBlock = { ...EMPTY_POINTS };
+    const infeasible: string[] = [];
+
+    // Speed: max over targets of the min points to outspeed.
+    for (const s of c.speed) {
+        const need = minSpeedPoints(c.base.spe, c.nature, s.targetSpe);
+        if (need === null) infeasible.push(s.label);
+        else points.spe = Math.max(points.spe, need);
+    }
+
+    // Offense: physical KOs bound Atk, special KOs bound SpA.
+    for (const k of c.ko) {
+        const r = minOffenseToKO({
+            offBase: k.isPhysical ? c.base.atk : c.base.spa,
+            offKey: k.isPhysical ? 'atk' : 'spa',
+            nature: c.nature, currentPoints: 0,
+            movePower: k.movePower, isStab: k.isStab, typeMult: k.typeMult, isPhysical: k.isPhysical,
+            targetDef: k.targetDef, targetHp: k.targetHp,
+        }, k.hits);
+        if (r.points === null) infeasible.push(k.label);
+        else if (k.isPhysical) points.atk = Math.max(points.atk, r.points);
+        else points.spa = Math.max(points.spa, r.points);
+    }
+
+    // Survival: sweep HP; at each level take least Def (phys) and least SpD (spec).
+    const phys = c.survive.filter((s) => s.isPhysical);
+    const spec = c.survive.filter((s) => !s.isPhysical);
+    if (phys.length > 0 || spec.length > 0) {
+        let best: { hp: number; def: number; spd: number; total: number } | null = null;
+        for (let hpPts = 0; hpPts <= MAX_POINTS; hpPts++) {
+            const d = minDefPoints(phys, c.base, c.nature, hpPts, 'def');
+            const s = minDefPoints(spec, c.base, c.nature, hpPts, 'spd');
+            if (d === null || s === null) continue;
+            const total = hpPts + d + s;
+            if (best === null || total < best.total) best = { hp: hpPts, def: d, spd: s, total };
+        }
+        if (best === null) {
+            // At least one survival req is impossible even at 32 HP / 32 def; label each such req.
+            const hpMax = finalHp(c.base.hp, MAX_POINTS);
+            for (const r of c.survive) {
+                const key = r.isPhysical ? 'def' : 'spd';
+                const defStat = finalStat(r.isPhysical ? c.base.def : c.base.spd, key, MAX_POINTS, c.nature);
+                if (dmgRange(r.attackerStat, defStat, r.movePower, r.isStab, r.typeMult, r.isPhysical, hpMax).max >= hpMax) infeasible.push(r.label);
+            }
+        } else {
+            points.hp = best.hp; points.def = best.def; points.spd = best.spd;
+        }
+    }
+
+    const totalUsed = points.hp + points.atk + points.def + points.spa + points.spd + points.spe;
+    const leftover = budget - totalUsed;
+    return { feasible: infeasible.length === 0 && leftover >= 0, points, totalUsed, leftover, infeasible };
+}

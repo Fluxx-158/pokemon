@@ -177,7 +177,7 @@ function StatsGrid({ member }: { member: TeamMemberDetail }) {
                                     : 'text-muted-foreground',
                             )}
                         >
-                            {ev > 0 ? ev : ', '}
+                            {ev > 0 ? ev : '-'}
                         </div>
                     );
                 })}

@@ -524,17 +524,17 @@ function PokemonDetailPage() {
                                     <TableCell>
                                         <MoveClassIcon cls={m.damageClass} />
                                     </TableCell>
-                                    <TableCell className="text-center tabular-nums">{m.power ?? ', '}</TableCell>
+                                    <TableCell className="text-center tabular-nums">{m.power ?? '-'}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.accuracy === null ? ', ' : `${m.accuracy}%`}
+                                        {m.accuracy === null ? '-' : `${m.accuracy}%`}
                                     </TableCell>
                                     <TableCell className="text-center tabular-nums">{m.ppPc}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.priority === 0 ? ', ' : (m.priority > 0 ? `+${m.priority}` : m.priority)}
+                                        {m.priority === 0 ? '-' : (m.priority > 0 ? `+${m.priority}` : m.priority)}
                                     </TableCell>
                                     <TableCell className="text-xs text-muted-foreground">{m.learnMethod}</TableCell>
                                     <TableCell className="text-center tabular-nums">
-                                        {m.learnMethod === 'level-up' ? m.levelLearnedAt : ', '}
+                                        {m.learnMethod === 'level-up' ? m.levelLearnedAt : '-'}
                                     </TableCell>
                                 </TableRow>
                             ))}

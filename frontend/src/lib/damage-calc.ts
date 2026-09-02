@@ -108,6 +108,21 @@ export function defenderImmuneByAbility(abilityName: string | undefined, moveTyp
     return entry !== undefined && entry.immuneTo === t;
 }
 
+// Protean / Libero retype the user to the move's type before it lands, so every
+// damaging move gets STAB. (PC: fires once per switch-in, but the first attack
+// of an appearance is always same-type.) Falls back to the base-typing check.
+const ALL_MOVES_STAB_ABILITIES = new Set(['Protean', 'Libero']);
+export function isStabType(
+    moveType: string,
+    type1: string,
+    type2: string | null,
+    ability?: string | null,
+): boolean {
+    if (ability && ALL_MOVES_STAB_ABILITIES.has(ability)) return true;
+    const t = capitalize(moveType);
+    return t === capitalize(type1) || (type2 != null && t === capitalize(type2));
+}
+
 export function berryTriggers(
     berryName: string | undefined,
     moveType: string,
